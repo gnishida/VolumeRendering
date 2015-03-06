@@ -2,6 +2,18 @@
 
 #include <GL/glew.h>
 
+static struct {
+    GLuint advection;
+    GLuint buoyancy;
+    GLuint addImpulse;
+    GLuint jacobi;
+    GLuint divergence;
+    GLuint subtractGradient;
+	GLuint boundary;
+    GLuint raycubeintersection;
+    GLuint raycast;
+} ShaderPrograms;
+
 struct CubeIntersectFBO {
 	GLuint fbo;
 	GLuint texture[2];
@@ -31,6 +43,15 @@ struct RenderData {
 
 class VolumeRendering {
 private:
+	int _winWidth;
+	int _winHeight;
+    GLuint _cube; //volume cube
+    GLuint _quad; //screen quad
+	CubeIntersectFBO _cubeinterFBO;
+
+    GLfloat _projectionMatrix[16]; 
+    GLfloat _modelviewMatrix[16];
+
 	GLsizei _gridWidth;
 	GLsizei _gridHeight;
 	GLsizei _gridDepth;
@@ -39,6 +60,12 @@ private:
 public:
 	VolumeRendering() {}
 
+	void init(int width, int height);
+	void loadShaderProgram();
+	void render();
+	void rayCubeIntersection(CubeIntersectFBO dest);
+	void renderScene();
+	void resetState();
 	void createData(GLsizei gridwidth, GLsizei gridheight, GLsizei griddepth);
 	void clearAllData();
 	void setDataVolume(DataVolume datav, float value);
