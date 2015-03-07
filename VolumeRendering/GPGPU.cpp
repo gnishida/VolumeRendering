@@ -4,9 +4,9 @@
 # define M_PI           3.14159265358979323846
 
 //volume info
-int gridWidth = 32;//128;
-int gridHeight = 32;//128;
-int gridDepth = 32;//128;
+int gridWidth = 128;
+int gridHeight = 128;
+int gridDepth = 128;
 
 //camera info
 float FOV = 60.0;

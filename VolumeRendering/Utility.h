@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glew.h"
+#include <GL/glew.h>
 #include <string>
 
 //utilities for shader program

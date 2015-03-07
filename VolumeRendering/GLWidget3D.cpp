@@ -58,6 +58,11 @@ void GLWidget3D::mouseMoveEvent(QMouseEvent *e)
  */
 void GLWidget3D::initializeGL()
 {
+	GLenum err = glewInit();
+	if (GLEW_OK != err){// Problem: glewInit failed, something is seriously wrong.
+		qDebug() << "Error: " << glewGetErrorString(err);
+	}
+
 	glClearColor(0.443, 0.439, 0.458, 0.0);
 
 	glEnable(GL_DEPTH_TEST);
@@ -67,6 +72,9 @@ void GLWidget3D::initializeGL()
 
 	static GLfloat lightPosition[4] = {0.0f, 0.0f, 100.0f, 0.0f};
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+
+	gpgpu = new GPGPU();
+	gpgpu->init(256, 256);
 }
 
 /**
@@ -102,6 +110,7 @@ void GLWidget3D::paintGL()
  * Draw the scene.
  */
 void GLWidget3D::drawScene() {
+	gpgpu->update();
 }
 
 QVector2D GLWidget3D::mouseTo2D(int x,int y) {
@@ -124,3 +133,7 @@ QVector2D GLWidget3D::mouseTo2D(int x,int y) {
 	return QVector2D(posX, posY);
 }
 
+void GLWidget3D::restart() {
+	gpgpu->restart();
+	gpgpu->setMaterial(0);
+}

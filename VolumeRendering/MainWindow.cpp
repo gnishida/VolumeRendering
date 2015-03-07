@@ -3,6 +3,7 @@
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags) {
 	ui.setupUi(this);
 
+	connect(ui.actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
 	connect(ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
 	glWidget = new GLWidget3D();
@@ -10,4 +11,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, 
 }
 
 MainWindow::~MainWindow() {
+}
+
+void MainWindow::onStart() {
+	glWidget->restart();
 }

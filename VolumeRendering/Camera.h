@@ -1,6 +1,9 @@
 #pragma once
 
-#include <QtOpenGL>
+#include <GL/glew.h>
+#include <QVector2D>
+#include <QVector4D>
+#include <QMatrix4x4>
 
 class Camera {
 public:

@@ -78,20 +78,20 @@
     <ClInclude Include="GeneratedFiles\ui_MainWindow.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GLWidget3D.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Utility.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="GPGPU.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DataManager.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GPGPU.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GLWidget3D.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
