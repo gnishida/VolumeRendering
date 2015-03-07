@@ -75,6 +75,11 @@ void GLWidget3D::initializeGL()
 
 	gpgpu = new GPGPU();
 	gpgpu->init(256, 256);
+
+	gpgpu->restart();
+	gpgpu->setMaterial(0);
+
+	timer.start(1000, this);
 }
 
 /**
@@ -88,6 +93,7 @@ void GLWidget3D::resizeGL(int width, int height)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(60, (GLfloat)width/(GLfloat)height, 0.01f, 10000);
+	glGetFloatv(GL_PROJECTION_MATRIX, gpgpu->_projectionMatrix);
 	glMatrixMode(GL_MODELVIEW);
 }
 
@@ -96,12 +102,13 @@ void GLWidget3D::resizeGL(int width, int height)
  */
 void GLWidget3D::paintGL()
 {
-	glMatrixMode(GL_MODELVIEW);
+	//glMatrixMode(GL_MODELVIEW);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
 	camera.applyCamTransform();
+	glGetFloatv(GL_MODELVIEW_MATRIX, gpgpu->_modelviewMatrix);
 
 	drawScene();		
 }
@@ -136,4 +143,10 @@ QVector2D GLWidget3D::mouseTo2D(int x,int y) {
 void GLWidget3D::restart() {
 	gpgpu->restart();
 	gpgpu->setMaterial(0);
+}
+
+void GLWidget3D::timerEvent(QTimerEvent* e) {
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+	updateGL();
 }

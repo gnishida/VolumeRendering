@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include <QVector3D>
 #include <vector>
+#include <QBasicTimer>
 #include "GPGPU.h"
 
 using namespace std;
@@ -18,6 +19,7 @@ private:
 	Camera camera;
 	QPoint lastPos;
 	GPGPU* gpgpu;
+	QBasicTimer timer;
 
 public:
 	GLWidget3D();
@@ -32,5 +34,6 @@ protected:
 	void mousePressEvent(QMouseEvent *e);
 	void mouseMoveEvent(QMouseEvent *e);
 	void mouseReleaseEvent(QMouseEvent *e);
+	void timerEvent(QTimerEvent* e);
 };
 

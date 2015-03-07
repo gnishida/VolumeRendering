@@ -29,7 +29,7 @@ public:
 	void setMaterial(int material); //0 smoke, 1 fire, 2 smoke&fire
 	void setWindowSize(int width, int height);
 
-private:
+public:
 	DataManager dataman;
 
 	int _winWidth;
