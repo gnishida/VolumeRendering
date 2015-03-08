@@ -68,9 +68,9 @@ void GLWidget3D::initializeGL() {
 	for (int x = 0; x < width; ++x) {
 		for (int y = 0; y < height; ++y) {
 			for (int z = 0; z < depth; ++z) {
-				float val;
-				fread(&val, sizeof(float), (size_t)1, fp);
-				data[z * width * height + y * width + x] = val;
+				uchar val;
+				fread(&val, 1, 1, fp);
+				data[z * width * height + y * width + x] = (float)val - 40.0f;
 			}
 		}
 	}
