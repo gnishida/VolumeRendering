@@ -15,24 +15,6 @@ struct DataVolume {
 	GLuint texture;
 };
 
-struct DuoDataVolume {
-	DataVolume cur; 
-	DataVolume pre;
-};
-
-struct RenderData {
-	//Duo for swap
-	DuoDataVolume Velocity;
-    DuoDataVolume Density;
-    DuoDataVolume Pressure;
-    DuoDataVolume Temperature;
-
-    //single data
-    DataVolume Divergence;
-
-	DataVolume Test;
-};
-
 class DataManager
 {
 public:
@@ -40,7 +22,7 @@ public:
 
 	void createData(GLsizei gridwidth, GLsizei gridheight, GLsizei griddepth);
 	void clearAllData();
-	RenderData data;
+	DataVolume data;
 
 	//set a default value to whole texture
 	void setDataVolume(DataVolume datav, float value);
@@ -51,8 +33,6 @@ private:
 	GLsizei _gridHeight;
 	GLsizei _gridDepth;
 
-	DuoDataVolume createDuoDataVolume(int numComponents);
-	DataVolume createSingleDataVolume(int numComponents);
 	DataVolume createVolumeData(GLsizei width, GLsizei height, GLsizei depth, int numComponents);
 	DataVolume createCloudVolumeData(GLsizei width, GLsizei height, GLsizei depth);
 };

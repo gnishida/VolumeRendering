@@ -78,9 +78,6 @@ void GLWidget3D::initializeGL()
 	gpgpu = new GPGPU();
 	gpgpu->init(256, 256);
 
-	gpgpu->restart();
-	gpgpu->setMaterial(0);
-
 	//timer.start(1000, this);
 }
 
@@ -144,11 +141,6 @@ QVector2D GLWidget3D::mouseTo2D(int x,int y) {
 	gluUnProject(x, (float)viewport[3] - y, z, modelview, projection, viewport, &posX, &posY, &posZ);
 
 	return QVector2D(posX, posY);
-}
-
-void GLWidget3D::restart() {
-	gpgpu->restart();
-	gpgpu->setMaterial(0);
 }
 
 void GLWidget3D::timerEvent(QTimerEvent* e) {

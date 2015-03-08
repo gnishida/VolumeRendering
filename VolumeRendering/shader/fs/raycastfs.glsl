@@ -41,106 +41,30 @@ void main()
 	glFragColor = vec4(0);
 	vec3 pos = enter;
 
-
-	if(material == 0) //smoke
-	{
-		while(alpha>0.01 && raylen>0){
-			float sampleDens = texture(density, pos).x * densityScale; //density is too small, but temprature starts very high
-			if(sampleDens>0){
-				//get lights color on the pixel
-				vec3 lightDir = normalize(lightPos-pos)*lightStepSize;
-				vec3 lpos = pos + lightDir;
-				//get alpha of how many light can reach the pixel
-				float lapha = 1.0;
-				for (int s=0; s < lightsampleNum; ++s) {
-					float ldens = texture(density, lpos).x;
-					lapha *= 1.0-absorbRate*stepSize*ldens; 
-					if (lapha <= 0.01) {break;}//if light can't go through
-					lpos += lightDir;
-				}
-				vec3 finallightColor = lightColor*lapha;
-
-				alpha *= 1.0-sampleDens*stepSize*absorbRate; //alpha of current color can reach the eye
-				color += finallightColor*alpha*sampleDens*stepSize; //sample color contribution
+	while(alpha>0.01 && raylen>0){
+		float sampleDens = texture(density, pos).x * densityScale; //density is too small, but temprature starts very high
+		if(sampleDens>0){
+			//get lights color on the pixel
+			vec3 lightDir = normalize(lightPos-pos)*lightStepSize;
+			vec3 lpos = pos + lightDir;
+			//get alpha of how many light can reach the pixel
+			float lapha = 1.0;
+			for (int s=0; s < lightsampleNum; ++s) {
+				float ldens = texture(density, lpos).x;
+				lapha *= 1.0-absorbRate*stepSize*ldens; 
+				if (lapha <= 0.01) {break;}//if light can't go through
+				lpos += lightDir;
 			}
+			vec3 finallightColor = lightColor*lapha;
 
-			pos += step;
-			raylen -= stepSize;
+			alpha *= 1.0-sampleDens*stepSize*absorbRate; //alpha of current color can reach the eye
+			color += finallightColor*alpha*sampleDens*stepSize; //sample color contribution
 		}
 
-		glFragColor.rgb = color;
-		glFragColor.a = 1-alpha;
-	}
-	
-
-	if(material == 1) //fire
-	{
-		bool fullColor = false;
-		while(alpha>0.01 && raylen>0){
-			float sampleDens = texture(density, pos).x * densityScale; //density is too small, but temprature starts very high
-			float T = texture(temperature, pos).x;
-			if(sampleDens>0 && T>0){
-				//get temprature color
-				float thresholdOne = 2.0;
-				float thresholdTwo = 5.0;
-				vec3 fireColor = vec3(1.0, 1.0, 0.5);
-				if(T<thresholdOne) fireColor = vec3(1.0, 0.0, 0.0);
-				if(T>=thresholdOne&&T<thresholdTwo) fireColor = vec3(1.0, 1.0, 0.0);
-
-				alpha *= 1.0-sampleDens*stepSize*absorbRate; //alpha of current color can reach the eye
-
-				color += (fireColor*fireColorScale)*alpha*sampleDens*stepSize; //sample color contribution
-			}
-
-			if(color == vec3(1.0)){fullColor=true;break;} 
-			pos += step;
-			raylen -= stepSize;
-		}
-
-		glFragColor.rgb = color;
-		glFragColor.a = 1-alpha;
+		pos += step;
+		raylen -= stepSize;
 	}
 
-
-	if(material == 2) //smoke & fire
-	{
-		while(alpha>0.01 && raylen>0){
-			float sampleDens = texture(density, pos).x * densityScale; //density is too small, but temprature starts very high
-			float T = texture(temperature, pos).x;
-			if(sampleDens>0 && T>0){
-				//get lights color on the pixel
-				vec3 lightDir = normalize(lightPos-pos)*lightStepSize;
-				vec3 lpos = pos + lightDir;
-				//get alpha of how many light can reach the pixel
-				float lapha = 1.0;
-				for (int s=0; s < lightsampleNum; ++s) {
-					float ldens = texture(density, lpos).x;
-					lapha *= 1.0-absorbRate*stepSize*ldens; 
-					if (lapha <= 0.01) {break;}//if light can't go through
-					lpos += lightDir;
-				}
-				vec3 finallightColor = lightColor*lapha;
-
-				//get temprature color
-				float thresholdOne = 2.0; //red color
-				float thresholdTwo = 5.0; //yellow color
-				float thresholdSmoke = 1.0; //smoke
-				vec3 fireColor = vec3(1.0, 1.0, 0.5);
-				if(T<thresholdSmoke) { fireColor = vec3(1.0, 1.0, 1.0) * 0.5 * finallightColor * 0.15; }//apply smoke color on it
-				if(T>=thresholdSmoke&&T<thresholdOne) fireColor = vec3(1.0, 0.0, 0.0);
-				if(T>=thresholdOne&&T<thresholdTwo) fireColor = vec3(1.0, 1.0, 0.0);
-
-				alpha *= 1.0-sampleDens*stepSize*absorbRate; //alpha of current color can reach the eye
-				color += (fireColor*fireColorScale)*alpha*sampleDens*stepSize; //sample color contribution
-			}
-
-			pos += step;
-			raylen -= stepSize;
-		}
-
-		glFragColor.rgb = color;
-		glFragColor.a = 1-alpha;
-	}
-
-
+	glFragColor.rgb = color;
+	glFragColor.a = 1-alpha;
 }

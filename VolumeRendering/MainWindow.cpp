@@ -14,5 +14,4 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::onStart() {
-	glWidget->restart();
 }

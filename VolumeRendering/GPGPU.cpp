@@ -42,24 +42,16 @@ GPGPU::GPGPU(){}
 void GPGPU::init(int width, int height){
 	_winWidth = width;
 	_winHeight = height;
-	_material = -1;//no material at beginning
     _cube = CreateCubeVao();
     _quad = CreateQuadVao();
 	
 	loadShaderProgram();
 
 	dataman.createData(gridWidth, gridHeight, gridDepth);
-	dataman.setDataVolume(dataman.data.Temperature.cur, ambientTemperature);
 	_cubeinterFBO = dataman.cubeIntersectFBO(_winWidth, _winHeight); //raycasting intersection test texture
 
 	glDisable(GL_DEPTH_TEST);
     glEnableVertexAttribArray(0);
-}
-
-void GPGPU::setMaterial(int material){
-	if(material>-1 || material<2){
-		_material = material;
-	}
 }
 
 void GPGPU::setWindowSize(int width, int height){
@@ -67,17 +59,7 @@ void GPGPU::setWindowSize(int width, int height){
 	_winHeight = height;
 }
 
-void GPGPU::restart(){
-	dataman.clearAllData();
-	dataman.setDataVolume(dataman.data.Temperature.cur, ambientTemperature);
-}
-
 void GPGPU::update(){
-    updateData();
-    render();
-}
-
-void GPGPU::render(){
     // 画面サイズなどから、projectionMatrixを計算する
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -105,78 +87,10 @@ void GPGPU::render(){
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Perform the raycast to get fianl image
-    renderScene();
-}
-
-void GPGPU::updateData(){
-    // Backup the viewport dimensions
-    int vp[4];
-    glGetIntegerv(GL_VIEWPORT, vp);
-    glViewport(0, 0, gridWidth, gridHeight);
-    glEnable(GL_CULL_FACE);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBindVertexArray(_quad); //draw quad
-
-    // 1. update all divergence free components first 3 of Navier-Stokes Equation
-    //update advecation(velocity)
-    updateAdvect(dataman.data.Velocity.cur, dataman.data.Velocity.cur, dataman.data.Velocity.pre, VelocityDissipation);
-    swapTexture(&dataman.data.Velocity);
-    
-    //temperature and density are also flow along the velocity
-    updateAdvect(dataman.data.Velocity.cur, dataman.data.Temperature.cur, dataman.data.Temperature.pre, TemperatureDissipation);
-    swapTexture(&dataman.data.Temperature);
-    updateAdvect(dataman.data.Velocity.cur, dataman.data.Density.cur, dataman.data.Density.pre, DensityDissipation);
-    swapTexture(&dataman.data.Density);
-    updateBuoyancy(dataman.data.Velocity.cur, dataman.data.Temperature.cur, dataman.data.Density.cur, dataman.data.Velocity.pre);
-    swapTexture(&dataman.data.Velocity);
-
-	//impose force
-    updateImpulse(dataman.data.Temperature.cur, forcePos, forceTemperature);
-    updateImpulse(dataman.data.Density.cur, forcePos, forceDensity);
-
-    //diffuse (if viscosity is > 0)
-	if (viscosity > 0){
-		for (int i = 0; i < jacobiInter; ++i){
-			jacobi(dataman.data.Velocity.cur, dataman.data.Velocity.cur, dataman.data.Velocity.pre, centerFactor, stencilFactor);
-			swapTexture(&dataman.data.Velocity);
-		}
-	}
-
-    // 2. divergence calculate Pressure
-    computeDivergence(dataman.data.Velocity.cur, dataman.data.Divergence);
-    dataman.setDataVolume(dataman.data.Pressure.cur, 0); //clear pressure data
-    for (int i = 0; i < jacobiInter; ++i) {
-        jacobi(dataman.data.Pressure.cur, dataman.data.Divergence, dataman.data.Pressure.pre, -dx * dx, pressureGradientrBeta);
-        swapTexture(&dataman.data.Pressure);
-		//update boundary
-		updateBoundary(dataman.data.Pressure.cur, dataman.data.Pressure.pre, 1);
-		swapTexture(&dataman.data.Pressure);
-    }
-
-    // 3. Subtract gradient to get final velocity
-	//no-slip velocity
-	updateBoundary(dataman.data.Velocity.cur, dataman.data.Velocity.pre, -1);
-	swapTexture(&dataman.data.Velocity);
-
-    subtractPressureGradient(dataman.data.Velocity.cur, dataman.data.Pressure.cur, dataman.data.Velocity.pre);
-    swapTexture(&dataman.data.Velocity);
-
-	//no-slip velocity
-	updateBoundary(dataman.data.Velocity.cur, dataman.data.Velocity.pre, -1);
-	swapTexture(&dataman.data.Velocity);
-
-    // Restore the stored viewport dimensions
-    glViewport(vp[0], vp[1], vp[2], vp[3]);
+    render();
 }
 
 void GPGPU::loadShaderProgram(){
-	ShaderPrograms.advection = LoadProgram("fluidvs", "fluidgs", "advectfs");
-    ShaderPrograms.buoyancy = LoadProgram("fluidvs", "fluidgs", "buoyancyfs");
-    ShaderPrograms.addImpulse = LoadProgram("fluidvs", "fluidgs", "forcefs");
-    ShaderPrograms.jacobi = LoadProgram("fluidvs", "fluidgs", "jacobifs");
-    ShaderPrograms.divergence = LoadProgram("fluidvs", "fluidgs", "divergencefs");
-    ShaderPrograms.subtractGradient = LoadProgram("fluidvs", "fluidgs", "subgradientfs");
-	ShaderPrograms.boundary = LoadProgram("fluidvs", "fluidgs", "boundaryfs");
     ShaderPrograms.raycubeintersection = LoadProgram("rayboxintersectvs", "", "rayboxintersectfs");
     ShaderPrograms.raycast = LoadProgram("raycastvs", "", "raycastfs");
 }
@@ -240,7 +154,7 @@ void GPGPU::rayCubeIntersection(CubeIntersectFBO dest){
 	resetState();
 }
 
-void GPGPU::renderScene(){
+void GPGPU::render(){
 	// raycastするGPUシェーダを選択
 	// rayCubeIntersectionと違い、modelviewMatrixやprojectionMatrixを使わないことに注意！
 	// デフォルトのままなので、つまり、(-1,-1)-(1,1)のOrtho射影を使用する。
@@ -257,8 +171,6 @@ void GPGPU::renderScene(){
 	setShaderUniform(getUniformLoc("raystart"), 0);
     setShaderUniform(getUniformLoc("raystop"), 1);
 	setShaderUniform(getUniformLoc("density"), 2);
-	setShaderUniform(getUniformLoc("temperature"), 3);
-	setShaderUniform(getUniformLoc("material"), _material); 
 	setShaderUniform(getUniformLoc("width"), _winWidth); 
 	setShaderUniform(getUniformLoc("height"), _winHeight); 
 
@@ -274,10 +186,7 @@ void GPGPU::renderScene(){
 
 	// 密度データを格納した3Dテクスチャを、テクスチャ２として使用する
 	//glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_3D, dataman.data.Density.cur.texture);
-	glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_3D, dataman.data.Test.texture);
-
-	// 温度データを格納した3Dテクスチャを、テクスチャ３として使用する
-	glActiveTexture(GL_TEXTURE3); glBindTexture(GL_TEXTURE_3D, dataman.data.Temperature.cur.texture); 
+	glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_3D, dataman.data.texture);
 
 	// クリアする色をセットする
     glClearColor(0, 0, 0, 0);
@@ -304,130 +213,6 @@ void GPGPU::renderScene(){
 	resetState();
 }
 
-void GPGPU::updateAdvect(DataVolume velocity, DataVolume source, DataVolume dest, float dissipation){
-    glUseProgram(ShaderPrograms.advection);
-
-    //set uniform
-    setShaderUniform(getUniformLoc("velocity"), 0);
-    setShaderUniform(getUniformLoc("source"), 1);
-	setShaderUniform(getUniformLoc("inverseSize"), 1.0/float(gridWidth), 1.0/float(gridHeight), 1.0/float(gridDepth));
-    setShaderUniform(getUniformLoc("dt"), dt);
-	setShaderUniform(getUniformLoc("rdx"), 1.0f/dx);
-    setShaderUniform(getUniformLoc("dissipation"), dissipation);
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, dest.fbo);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, velocity.texture);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_3D, source.texture);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, gridDepth);
-    resetState();
-}
-
-void GPGPU::updateBuoyancy(DataVolume velocity, DataVolume temperature, DataVolume density, DataVolume dest){
-    glUseProgram(ShaderPrograms.buoyancy);
-
-	setShaderUniform(getUniformLoc("velocity"), 0);
-    setShaderUniform(getUniformLoc("temperature"), 1);
-    setShaderUniform(getUniformLoc("density"), 2);
-    setShaderUniform(getUniformLoc("ambientTemperature"), ambientTemperature);
-    setShaderUniform(getUniformLoc("dt"), dt);
-    setShaderUniform(getUniformLoc("sigma"), buoyancy);
-    setShaderUniform(getUniformLoc("kappa"), weight);
-	setShaderUniform(getUniformLoc("material"), _material);
-	setShaderUniform(getUniformLoc("dir"), 0.0, 1.0, 0.0);//force direction
-
-    glBindFramebuffer(GL_FRAMEBUFFER, dest.fbo);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, velocity.texture);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_3D, temperature.texture);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_3D, density.texture);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, gridDepth);
-    resetState();
-}
-
-void GPGPU::updateImpulse(DataVolume dest, float* position, float value)
-{
-    glUseProgram(ShaderPrograms.addImpulse);
-
-    setShaderUniform(getUniformLoc("pos"), position[0], position[1], position[2]);
-    setShaderUniform(getUniformLoc("radius"), forceRadius);
-    setShaderUniform(getUniformLoc("force"), value, value, value);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, dest.fbo);
-    glEnable(GL_BLEND);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, gridDepth);
-    resetState();
-}
-
-void GPGPU::computeDivergence(DataVolume velocity, DataVolume dest)
-{
-    glUseProgram(ShaderPrograms.divergence);
-
-    setShaderUniform(getUniformLoc("halfrdx"), 0.5f / dx);
-    setShaderUniform(getUniformLoc("velocity"), 0);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, dest.fbo);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, velocity.texture);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, gridDepth);
-    resetState();
-}
-
-void GPGPU::jacobi(DataVolume pressure, DataVolume divergence, DataVolume dest, float alpha, float rBeta)
-{
-    glUseProgram(ShaderPrograms.jacobi);
-
-    setShaderUniform(getUniformLoc("alpha"), alpha);
-    setShaderUniform(getUniformLoc("rBeta"), rBeta);
-    setShaderUniform(getUniformLoc("x"), 0);
-    setShaderUniform(getUniformLoc("b"), 1);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, dest.fbo);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, pressure.texture);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_3D, divergence.texture);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, gridDepth);
-    resetState();
-}
-
-void GPGPU::subtractPressureGradient(DataVolume velocity, DataVolume pressure, DataVolume dest)
-{
-    glUseProgram(ShaderPrograms.subtractGradient);
-
-	setShaderUniform(getUniformLoc("halfrdx"), gradientDivergedx);
-    setShaderUniform(getUniformLoc("velocity"), 0);
-    setShaderUniform(getUniformLoc("pressure"), 1);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, dest.fbo);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, velocity.texture);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_3D, pressure.texture);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, gridDepth);
-    resetState();
-}
-
-void GPGPU::updateBoundary(DataVolume source, DataVolume dest, float scale){
-    glUseProgram(ShaderPrograms.boundary);
-
-    //set uniform
-    setShaderUniform(getUniformLoc("texture"), 0);
-	setShaderUniform(getUniformLoc("scale"), scale);
-	setShaderUniform(getUniformLoc("width"), gridWidth);
-    setShaderUniform(getUniformLoc("height"), gridHeight);
-	setShaderUniform(getUniformLoc("depth"), gridDepth);
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, dest.fbo);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, source.texture);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, gridDepth);
-    resetState();
-} 
-
 void GPGPU::resetState()
 {
     glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_3D, 0);
@@ -438,9 +223,3 @@ void GPGPU::resetState()
     glDisable(GL_BLEND);
 }
 
-void GPGPU::swapTexture(DuoDataVolume* data)
-{
-    DataVolume temp = data->cur;
-    data->cur = data->pre;
-    data->pre = temp;
-}

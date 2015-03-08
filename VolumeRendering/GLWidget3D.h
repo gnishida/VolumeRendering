@@ -25,7 +25,6 @@ public:
 	GLWidget3D();
 	void drawScene();
 	QVector2D mouseTo2D(int x,int y);
-	void restart();
 
 protected:
 	void initializeGL();
