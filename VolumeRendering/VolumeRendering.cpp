@@ -2,21 +2,84 @@
 #include <iostream>
 #include "Utility.h"
 
-void VolumeRendering::init(int winWidth, int winHeight, int gridWidth, int gridHeight, int gridDepth, float* data) {
+VolumeRendering::VolumeRendering(int winWidth, int winHeight) {
 	this->winWidth = winWidth;
 	this->winHeight = winHeight;
 
 	program_raycubeintersection = LoadProgram("rayboxintersectvs", "rayboxintersectfs");
     program_raycast = LoadProgram("raycastvs", "raycastfs");
 
-	createVolumeData(gridWidth, gridHeight, gridDepth, data);
-
     cubeVao = CreateCubeVao();
     quadVao = CreateQuadVao();
-	cubeinterFBO = cubeIntersectFBO(winWidth, winHeight); //raycasting intersection test texture
+	cubeIntersectFBO(winWidth, winHeight); //raycasting intersection test texture
 
 	glDisable(GL_DEPTH_TEST);
     glEnableVertexAttribArray(0);
+
+	fbo = 0;
+	texture = 0;
+}
+
+VolumeRendering::~VolumeRendering() {
+	if (fbo > 0) {
+		glDeleteFramebuffers(1, &fbo);
+		glDeleteTextures(1, &texture);
+	}
+
+	if (cubeVao > 0) {
+		glDeleteVertexArrays(1, &cubeVao);
+		glDeleteVertexArrays(1, &quadVao);
+	}
+
+	if (cubeinterFBO.fbo > 0) {
+		glDeleteFramebuffers(1, &cubeinterFBO.fbo);
+		glDeleteTextures(2, cubeinterFBO.texture);
+	}
+}
+
+/**
+ * FBOと、対応する、指定した幅、高さ、奥行きの3Dテクスチャを生成し、
+ * 雲みたいなやつをセットする。
+ *
+ * @param width				幅
+ * @param height			高さ
+ * @param depth				奥行き
+ * @param numComponents		コンポーネントの数 (各テクセルがscalarなら1、RGBベクトルなら3）
+ * @return					FBOと対応する3Dテクスチャを返却する。
+ */
+void VolumeRendering::setVolumeData(GLsizei width, GLsizei height, GLsizei depth, float* data) {
+	if (fbo > 0) {
+		glDeleteFramebuffers(1, &fbo);
+		glDeleteTextures(1, &texture);
+	}
+
+	//the FBO
+	glGenFramebuffers(1, &this->fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
+
+	// 3Dテクスチャを生成
+	glGenTextures(1, &this->texture);
+
+	// 生成した3Dテクスチャのパラメータを設定する
+	glBindTexture(GL_TEXTURE_3D, this->texture);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// 3Dテクスチャ用のメモリを確保する
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, width, height, depth, 0, GL_RED, GL_FLOAT, data);
+    if(GL_NO_ERROR != glGetError()){std::cout<<"Unable to create 3D texture"<<std::endl;}
+
+	// 生成した3Dテクスチャを、fboに括り付ける。
+	// 以後、OpenGLに対しては、fboを指定することで、この3Dテクスチャにアクセスできるようになる。
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->texture, 0);
+
+    if(GL_NO_ERROR != glGetError()){std::cout<<"Unable to bind texture to fbo"<<std::endl;}
+
+	// 出力先をスクリーンに戻す
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void VolumeRendering::setWindowSize(int width, int height) {
@@ -176,39 +239,16 @@ void VolumeRendering::render() {
 }
 
 /**
- * datavに括り付けられた3Dテクスチャの各テクセルの値を、vにセットする。
- * datavには、fboが括り付けられており、OpenGLに対してfboを指定することで、
- * 対応する3Dテクスチャに対して操作が出来るようになっている。
- *
- * @param datav		3Dテクスチャを含むデータ
- * @param v			セットする値
- */
-void VolumeRendering::setDataVolume(float v) {
-	// datavのfboをバインドすることで、以降の描画命令は、
-	// このfboに括り付けられたテクスチャに対して行われる。
-    glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
-
-	// クリアする色をセットする
-    glClearColor(v, v, v, v);
-
-	// datavのfboに括り付けられた3Dテクスチャの内容を全て、指定した値にセットする
-    glClear(GL_COLOR_BUFFER_BIT);
-}
-
-/**
  * RayTracingに必要となる、前面／背面の交点計算用のfbo、および、それに対応する2Dテクスチャを生成する。
  * fboに2Dテクスチャを括り付けることで、以後は、OpenGLに対してfboを介して2Dテクスチャにアクセスできるようになる。
  *
  * @param width		画面の幅
  * @param height	画面の高さ
- * @return			fboと対応する2Dテクスチャ
  */
-CubeIntersectFBO VolumeRendering::cubeIntersectFBO(GLsizei width, GLsizei height) {
-    CubeIntersectFBO cubefbo;
-
+void VolumeRendering::cubeIntersectFBO(GLsizei width, GLsizei height) {
 	// fboを生成する
-    glGenFramebuffers(1, &cubefbo.fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, cubefbo.fbo);
+    glGenFramebuffers(1, &cubeinterFBO.fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, cubeinterFBO.fbo);
 
     for (int i = 0; i < 2; ++i) {
 		// 2Dテクスチャを生成する
@@ -222,7 +262,7 @@ CubeIntersectFBO VolumeRendering::cubeIntersectFBO(GLsizei width, GLsizei height
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         
-        cubefbo.texture[i] = textureId;
+        cubeinterFBO.texture[i] = textureId;
 
 		// 生成したテクスチャ用に、メモリを確保する
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_HALF_FLOAT, 0); 
@@ -243,48 +283,6 @@ CubeIntersectFBO VolumeRendering::cubeIntersectFBO(GLsizei width, GLsizei height
 
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    return cubefbo;
-}
-
-/**
- * FBOと、対応する、指定した幅、高さ、奥行きの3Dテクスチャを生成し、
- * 雲みたいなやつをセットする。
- *
- * @param width				幅
- * @param height			高さ
- * @param depth				奥行き
- * @param numComponents		コンポーネントの数 (各テクセルがscalarなら1、RGBベクトルなら3）
- * @return					FBOと対応する3Dテクスチャを返却する。
- */
-void VolumeRendering::createVolumeData(GLsizei width, GLsizei height, GLsizei depth, float* data) {
-	//the FBO
-	glGenFramebuffers(1, &this->fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
-
-	// 3Dテクスチャを生成
-	glGenTextures(1, &this->texture);
-
-	// 生成した3Dテクスチャのパラメータを設定する
-	glBindTexture(GL_TEXTURE_3D, this->texture);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// 3Dテクスチャ用のメモリを確保する
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, width, height, depth, 0, GL_RED, GL_FLOAT, data);
-    if(GL_NO_ERROR != glGetError()){std::cout<<"Unable to create 3D texture"<<std::endl;}
-
-	// 生成した3Dテクスチャを、fboに括り付ける。
-	// 以後、OpenGLに対しては、fboを指定することで、この3Dテクスチャにアクセスできるようになる。
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->texture, 0);
-
-    if(GL_NO_ERROR != glGetError()){std::cout<<"Unable to bind texture to fbo"<<std::endl;}
-
-	// 出力先をスクリーンに戻す
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

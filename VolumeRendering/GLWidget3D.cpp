@@ -101,8 +101,8 @@ void GLWidget3D::initializeGL() {
 	}
 
 	// Volume Renderingを初期化
-	vr = new VolumeRendering();
-	vr->init(this->width(), this->height(), width, height, depth, data);
+	vr = new VolumeRendering(this->width(), this->height());
+	vr->setVolumeData(width, height, depth, data);
 
 	delete [] data;
 }

@@ -10,7 +10,7 @@ struct CubeIntersectFBO {
 };
 
 class VolumeRendering {
-public:
+private:
 	int winWidth;
 	int winHeight;
 
@@ -21,25 +21,24 @@ public:
 	GLuint program_raycubeintersection;
 	GLuint program_raycast;
 
-    GLfloat projectionMatrix[16]; 
-    GLfloat modelviewMatrix[16];
-
 	GLuint fbo;
 	GLuint texture;
 
 public:
-	VolumeRendering() {}
+    GLfloat projectionMatrix[16]; 
+    GLfloat modelviewMatrix[16];
 
-	void init(int winWidth, int winHeight, int gridWidth, int gridHeight, int gridDepth, float* data);
+public:
+	VolumeRendering(int winWidth, int winHeight);
+	~VolumeRendering();
+
+	void setVolumeData(GLsizei width, GLsizei height, GLsizei depth, float* data);
 	void setWindowSize(int width, int height);
 	void update();
 
-	//data render functions
+private:
 	void rayCubeIntersection(CubeIntersectFBO dest);
 	void render();
-
-	void setDataVolume(float value);
-	CubeIntersectFBO cubeIntersectFBO(GLsizei width, GLsizei height);
-	void createVolumeData(GLsizei width, GLsizei height, GLsizei depth, float* data);
+	void cubeIntersectFBO(GLsizei width, GLsizei height);
 };
 
