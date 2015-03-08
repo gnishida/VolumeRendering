@@ -1,6 +1,8 @@
 #pragma once
 
 #include <GL/glew.h>
+#include <vector>
+#include <QImage>
 
 struct CubeIntersectFBO {
 	GLuint fbo;
@@ -11,9 +13,6 @@ class VolumeRendering {
 public:
 	int winWidth;
 	int winHeight;
-	int gridWidth;
-	int gridHeight;
-	int gridDepth;
 
 	GLuint cubeVao;
     GLuint quadVao;
@@ -31,7 +30,7 @@ public:
 public:
 	VolumeRendering() {}
 
-	void init(int winWidth, int winHeight, int gridWidth, int gridHeight, int gridDepth);
+	void init(int winWidth, int winHeight, int gridWidth, int gridHeight, int gridDepth, float* data);
 	void setWindowSize(int width, int height);
 	void update();
 
@@ -39,11 +38,8 @@ public:
 	void rayCubeIntersection(CubeIntersectFBO dest);
 	void render();
 
-    void resetState(); //reset framebuffer, texture, etc after rendering
-
 	void setDataVolume(float value);
 	CubeIntersectFBO cubeIntersectFBO(GLsizei width, GLsizei height);
-	void createVolumeData(GLsizei width, GLsizei height, GLsizei depth);
-
+	void createVolumeData(GLsizei width, GLsizei height, GLsizei depth, float* data);
 };
 

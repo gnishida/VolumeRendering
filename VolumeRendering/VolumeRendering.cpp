@@ -2,17 +2,14 @@
 #include <iostream>
 #include "Utility.h"
 
-void VolumeRendering::init(int winWidth, int winHeight, int gridWidth, int gridHeight, int gridDepth) {
+void VolumeRendering::init(int winWidth, int winHeight, int gridWidth, int gridHeight, int gridDepth, float* data) {
 	this->winWidth = winWidth;
 	this->winHeight = winHeight;
-	this->gridWidth = gridWidth;
-	this->gridHeight = gridHeight;
-	this->gridDepth = gridDepth;
 
 	program_raycubeintersection = LoadProgram("rayboxintersectvs", "rayboxintersectfs");
     program_raycast = LoadProgram("raycastvs", "raycastfs");
 
-	createVolumeData(gridWidth, gridHeight, gridDepth);
+	createVolumeData(gridWidth, gridHeight, gridDepth, data);
 
     cubeVao = CreateCubeVao();
     quadVao = CreateQuadVao();
@@ -50,9 +47,6 @@ void VolumeRendering::update() {
 
     // RayCastのための、キューブの前面／背面の交点を計算する
     rayCubeIntersection(cubeinterFBO);
-
-	glEnable(GL_CULL_FACE);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // RayCastを実施して、スクリーンに描画する
     render();
@@ -114,7 +108,8 @@ void VolumeRendering::rayCubeIntersection(CubeIntersectFBO dest) {
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0); // 頂点をindexで指定するので、glDrawElementsを使う
 	                                                        // また、index数は36個あるので、引数は36。
 
-	resetState();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDisable(GL_BLEND);
 }
 
 void VolumeRendering::render() {
@@ -157,6 +152,10 @@ void VolumeRendering::render() {
 	// （スクリーンが出力先バッファとして指定されているので、スクリーンがクリアされる）
     glClear(GL_COLOR_BUFFER_BIT);
 
+	// Ray castingのため、alphaブレンディングを使用するよう、Blendオプションを設定する
+	glEnable(GL_CULL_FACE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	// raycastfs.glslシェーダ：
 	// １：画面上の各ピクセルに対応するrayについて、前面の交点座標(enter)をテクスチャ０から、
 	// 　　背面の交点座標(leave)をテクスチャ１から取得する。
@@ -172,14 +171,7 @@ void VolumeRendering::render() {
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); // 頂点座標の配列をそのまま使うので、glDrawArraysを使う
 	                                       // 頂点が4つあるので、引数は4。
 	
-	resetState();
-}
-
-void VolumeRendering::resetState() {
-    glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_3D, 0);
-    glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_3D, 0);
-    glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_3D, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_BLEND);
 }
 
@@ -266,24 +258,7 @@ CubeIntersectFBO VolumeRendering::cubeIntersectFBO(GLsizei width, GLsizei height
  * @param numComponents		コンポーネントの数 (各テクセルがscalarなら1、RGBベクトルなら3）
  * @return					FBOと対応する3Dテクスチャを返却する。
  */
-void VolumeRendering::createVolumeData(GLsizei width, GLsizei height, GLsizei depth) {
-	// 雲データの作成
-	float sigma = (float)width * 0.3;
-	float* data = new float[width * height * depth];
-	for (int x = 0; x < width; ++x) {
-		for (int y = 0; y < height; ++y) {
-			for (int z = 0; z < depth; ++z) {
-				float dist = (x - width * 0.5) * (x - width * 0.5)  + (y - height * 0.5) * (y - height * 0.5) + (z - depth * 0.5) * (z - depth * 0.5);
-				
-				if (dist < sigma * sigma) {
-					data[z * width * height + y * width + x] = expf(-dist/2.0/sigma/sigma);
-				} else {
-					data[z * width * height + y * width + x] = 0.0f;
-				}
-			}
-		}
-	}
-
+void VolumeRendering::createVolumeData(GLsizei width, GLsizei height, GLsizei depth, float* data) {
 	//the FBO
 	glGenFramebuffers(1, &this->fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
@@ -302,8 +277,6 @@ void VolumeRendering::createVolumeData(GLsizei width, GLsizei height, GLsizei de
 	// 3Dテクスチャ用のメモリを確保する
     glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, width, height, depth, 0, GL_RED, GL_FLOAT, data);
     if(GL_NO_ERROR != glGetError()){std::cout<<"Unable to create 3D texture"<<std::endl;}
-
-	delete [] data;
 
 	// 生成した3Dテクスチャを、fboに括り付ける。
 	// 以後、OpenGLに対しては、fboを指定することで、この3Dテクスチャにアクセスできるようになる。

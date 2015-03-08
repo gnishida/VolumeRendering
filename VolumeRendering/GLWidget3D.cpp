@@ -2,6 +2,7 @@
 #include "GLWidget3D.h"
 #include "MainWindow.h"
 #include <GL/GLU.h>
+#include <QRgb>
 
 #define SQR(x)	((x) * (x))
 
@@ -57,8 +58,53 @@ void GLWidget3D::initializeGL() {
 		qDebug() << "Error: " << glewGetErrorString(err);
 	}
 
+	// 3Dデータを読み込む
+	/*
+	std::vector<QImage> imgs;
+	for (int i = 1; i < 100; ++i) {
+		char filename[256];
+		sprintf(filename, "data/cthead-8bit%03d.tif", i);
+		imgs.push_back(QImage(filename));
+	}
+
+	int width = imgs[0].width();
+	int height = imgs[0].height();
+	int depth = imgs.size();
+	float* data = new float[width * height * depth];
+	for (int z = 0; z < depth; ++z) {
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
+				data[z * width * height + y * width + x] = (float)qGray(imgs[z].pixel(x, y)) / 255.0f;
+			}
+		}
+	}
+	*/
+
+	// 球の形の3Dデータを作成する
+	int width = 128;
+	int height = 128;
+	int depth = 128;
+	float sigma = (float)width * 0.3;
+	float* data = new float[width * height * depth];
+	for (int x = 0; x < width; ++x) {
+		for (int y = 0; y < height; ++y) {
+			for (int z = 0; z < depth; ++z) {
+				float dist = (x - width * 0.5) * (x - width * 0.5)  + (y - height * 0.5) * (y - height * 0.5) + (z - depth * 0.5) * (z - depth * 0.5);
+				
+				if (dist < sigma * sigma) {
+					data[z * width * height + y * width + x] = expf(-dist/2.0/sigma/sigma);
+				} else {
+					data[z * width * height + y * width + x] = 0.0f;
+				}
+			}
+		}
+	}
+
+	// Volume Renderingを初期化
 	vr = new VolumeRendering();
-	vr->init(this->width(), this->height(), 128, 128, 128);
+	vr->init(this->width(), this->height(), width, height, depth, data);
+
+	delete [] data;
 }
 
 /**
