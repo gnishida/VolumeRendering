@@ -9,8 +9,7 @@ struct CubeIntersectFBO {
 	GLuint texture[2];
 };
 
-class DataManager
-{
+class DataManager {
 public:
 	GLuint fbo;
 	GLuint texture;
@@ -19,7 +18,6 @@ public:
 	DataManager() {}
 
 	void createData(GLsizei gridwidth, GLsizei gridheight, GLsizei griddepth);
-
 	void setDataVolume(float value);
 	CubeIntersectFBO cubeIntersectFBO(GLsizei width, GLsizei height);
 

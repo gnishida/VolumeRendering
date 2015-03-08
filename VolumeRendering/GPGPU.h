@@ -12,10 +12,8 @@ public:
 	GPGPU() {}
 
 	void init(int width, int height);
-	void update();
-
-	void loadShaderProgram();
 	void setWindowSize(int width, int height);
+	void update();
 
 public:
 	DataManager dataman;

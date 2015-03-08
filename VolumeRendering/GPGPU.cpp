@@ -19,7 +19,8 @@ void GPGPU::init(int width, int height) {
     _cube = CreateCubeVao();
     _quad = CreateQuadVao();
 	
-	loadShaderProgram();
+	ShaderPrograms.raycubeintersection = LoadProgram("rayboxintersectvs", "rayboxintersectfs");
+    ShaderPrograms.raycast = LoadProgram("raycastvs", "raycastfs");
 
 	dataman.createData(gridWidth, gridHeight, gridDepth);
 	_cubeinterFBO = dataman.cubeIntersectFBO(_winWidth, _winHeight); //raycasting intersection test texture
@@ -62,11 +63,6 @@ void GPGPU::update() {
 
     // Perform the raycast to get fianl image
     render();
-}
-
-void GPGPU::loadShaderProgram() {
-    ShaderPrograms.raycubeintersection = LoadProgram("rayboxintersectvs", "rayboxintersectfs");
-    ShaderPrograms.raycast = LoadProgram("raycastvs", "raycastfs");
 }
 
 /**
