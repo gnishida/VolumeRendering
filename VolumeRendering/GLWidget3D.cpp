@@ -58,8 +58,26 @@ void GLWidget3D::initializeGL() {
 		qDebug() << "Error: " << glewGetErrorString(err);
 	}
 
-	// 3Dデータを読み込む
-	/*
+#if 1
+	// 盆栽の3Dデータを読み込む
+	FILE* fp = fopen("bonsai.raw", "r");
+	int width = 256;
+	int height = 256;
+	int depth = 256;
+	float* data = new float[width * height * depth];
+	for (int x = 0; x < width; ++x) {
+		for (int y = 0; y < height; ++y) {
+			for (int z = 0; z < depth; ++z) {
+				float val;
+				fread(&val, sizeof(float), (size_t)1, fp);
+				data[z * width * height + y * width + x] = val;
+			}
+		}
+	}
+#endif
+
+#if 0
+	// 頭の3Dデータを読み込む
 	std::vector<QImage> imgs;
 	for (int i = 1; i < 100; ++i) {
 		char filename[256];
@@ -78,8 +96,9 @@ void GLWidget3D::initializeGL() {
 			}
 		}
 	}
-	*/
+#endif
 
+#if 0
 	// 球の形の3Dデータを作成する
 	int width = 128;
 	int height = 128;
@@ -99,6 +118,7 @@ void GLWidget3D::initializeGL() {
 			}
 		}
 	}
+#endif
 
 	// Volume Renderingを初期化
 	vr = new VolumeRendering(this->width(), this->height());
