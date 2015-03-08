@@ -22,12 +22,12 @@ public:
 	float fovy;
 
 	Camera() {
-		xrot = -75.0;
+		xrot = 0.0;
 		yrot = 0.0;
 		zrot = 0.0f;//-45.0;
 		dx = 0.0;
 		dy = 0.0;
-		dz = -100.0;
+		dz = -2.0;
 		lookAtX = 0.0f;
 		lookAtY = 0.0f;
 		lookAtZ = 0.0f;

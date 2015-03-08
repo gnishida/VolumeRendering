@@ -39,7 +39,7 @@ GLuint LoadProgram(const char* vsfile, const char* gsfile, const char* fsfile)
     LoadShader((char*)fsPath.c_str(), fsSourceStr);
 
     if (vsSourceStr.empty()) std::cout<<"Can't load vertex shader "<<vsfile<<std::endl;
-    if (gsfile!="" && gsSourceStr.empty()) std::cout<<"Can't load geometry shader "<<gsfile<<std::endl;
+    if (gsfile[0]!=0 && gsSourceStr.empty()) std::cout<<"Can't load geometry shader "<<gsfile<<std::endl;
     if (fsfile!="" && fsSourceStr.empty()) std::cout<<"Can't load fragment shader "<<fsfile<<std::endl;
 
     //convert to const char
@@ -63,7 +63,7 @@ GLuint LoadProgram(const char* vsfile, const char* gsfile, const char* fsfile)
     }
     glAttachShader(programHandle, vsShader);
 
-    if(gsfile!=""){
+    if(gsfile[0]!=0){
         GLuint gsShader = glCreateShader(GL_GEOMETRY_SHADER);
         glShaderSource(gsShader, 1, &gsSource, NULL);
         glCompileShader(gsShader);

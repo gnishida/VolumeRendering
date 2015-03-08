@@ -6,6 +6,8 @@
 #define SQR(x)	((x) * (x))
 
 GLWidget3D::GLWidget3D() {
+	this->setFixedSize(256, 256);
+
 	// set up the camera
 	camera.setLookAt(0.0f, 0.0f, 0.0f);
 	camera.setYRotation(0);
@@ -63,15 +65,15 @@ void GLWidget3D::initializeGL()
 		qDebug() << "Error: " << glewGetErrorString(err);
 	}
 
-	glClearColor(0.443, 0.439, 0.458, 0.0);
+	//glClearColor(0.443, 0.439, 0.458, 0.0);
 
-	glEnable(GL_DEPTH_TEST);
+	/*glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_COLOR_MATERIAL);
 
 	static GLfloat lightPosition[4] = {0.0f, 0.0f, 100.0f, 0.0f};
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);*/
 
 	gpgpu = new GPGPU();
 	gpgpu->init(256, 256);
@@ -79,7 +81,7 @@ void GLWidget3D::initializeGL()
 	gpgpu->restart();
 	gpgpu->setMaterial(0);
 
-	timer.start(1000, this);
+	//timer.start(1000, this);
 }
 
 /**
@@ -89,12 +91,16 @@ void GLWidget3D::resizeGL(int width, int height)
 {
 	height = height?height:1;
 
-	glViewport( 0, 0, (GLint)width, (GLint)height );
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(60, (GLfloat)width/(GLfloat)height, 0.01f, 10000);
-	glGetFloatv(GL_PROJECTION_MATRIX, gpgpu->_projectionMatrix);
-	glMatrixMode(GL_MODELVIEW);
+    glViewport(0, 0, width, height);
+    
+	// Use orthographic projection
+    glMatrixMode(GL_PROJECTION);    
+    glLoadIdentity();               
+    gluOrtho2D(-1, 1, -1, 1);       
+    glMatrixMode(GL_MODELVIEW);     
+    glLoadIdentity(); 
+
+	gpgpu->setWindowSize(width, height);
 }
 
 /**
@@ -146,7 +152,7 @@ void GLWidget3D::restart() {
 }
 
 void GLWidget3D::timerEvent(QTimerEvent* e) {
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	updateGL();
+	//updateGL();
 }

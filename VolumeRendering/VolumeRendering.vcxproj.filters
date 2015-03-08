@@ -33,6 +33,12 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="Source Files\shader">
+      <UniqueIdentifier>{fe316368-abf1-4085-a1e7-b2aad84c3268}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\shader\fs">
+      <UniqueIdentifier>{a5818e7c-c77f-4a8b-bc59-c797db0a5dbc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -93,5 +99,34 @@
     <ClInclude Include="GLWidget3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\fs\advectfs.glsl">
+      <Filter>Source Files\shader\fs</Filter>
+    </None>
+    <None Include="shader\fs\buoyancyfs.glsl">
+      <Filter>Source Files\shader\fs</Filter>
+    </None>
+    <None Include="shader\fs\boundaryfs.glsl">
+      <Filter>Source Files\shader\fs</Filter>
+    </None>
+    <None Include="shader\fs\divergencefs.glsl">
+      <Filter>Source Files\shader\fs</Filter>
+    </None>
+    <None Include="shader\fs\forcefs.glsl">
+      <Filter>Source Files\shader\fs</Filter>
+    </None>
+    <None Include="shader\fs\jacobifs.glsl">
+      <Filter>Source Files\shader\fs</Filter>
+    </None>
+    <None Include="shader\fs\rayboxintersectfs.glsl">
+      <Filter>Source Files\shader\fs</Filter>
+    </None>
+    <None Include="shader\fs\subgradientfs.glsl">
+      <Filter>Source Files\shader\fs</Filter>
+    </None>
+    <None Include="shader\fs\raycastfs.glsl">
+      <Filter>Source Files\shader\fs</Filter>
+    </None>
   </ItemGroup>
 </Project>
