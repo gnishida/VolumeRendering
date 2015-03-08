@@ -6,11 +6,11 @@ VolumeRendering::VolumeRendering(int winWidth, int winHeight) {
 	this->winWidth = winWidth;
 	this->winHeight = winHeight;
 
-	program_raycubeintersection = LoadProgram("rayboxintersectvs", "rayboxintersectfs");
-    program_raycast = LoadProgram("raycastvs", "raycastfs");
+	program_raycubeintersection = Util::LoadProgram("rayboxintersectvs", "rayboxintersectfs");
+    program_raycast = Util::LoadProgram("raycastvs", "raycastfs");
 
-    cubeVao = CreateCubeVao();
-    quadVao = CreateQuadVao();
+    cubeVao = Util::CreateCubeVao();
+    quadVao = Util::CreateQuadVao();
 	cubeIntersectFBO(winWidth, winHeight); //raycasting intersection test texture
 
 	glDisable(GL_DEPTH_TEST);
@@ -131,8 +131,8 @@ void VolumeRendering::rayCubeIntersection(CubeIntersectFBO dest) {
 	// これに対して、カメラが移動しているので、このキューブを回転、移動しなければいけない。
 	// なので、modelviewMatrixとprojectionMatrixをカメラの位置などに基づいて計算し、
 	// シェーダに渡している。
-	setShaderUniform(getUniformLoc("modelviewMatrix"), (float*)&modelviewMatrix);
-    setShaderUniform(getUniformLoc("projectionMatrix"), (float*)&projectionMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(program_raycubeintersection, "modelviewMatrix"), 1, 0, (float*)&modelviewMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(program_raycubeintersection, "projectionMatrix"), 1, 0, (float*)&projectionMatrix);
     
 	// 画面バッファに、destのfboをバインドすることで、
 	// 以降の描画命令は、これに括りついたテクスチャに対して行われるようになる。
@@ -189,11 +189,11 @@ void VolumeRendering::render() {
 	// このことは、CreateQuadVao()関数を見ても分かる。xy座標しかセットしていない。
 	glUseProgram(program_raycast);
 
-	setShaderUniform(getUniformLoc("raystart"), 0);
-    setShaderUniform(getUniformLoc("raystop"), 1);
-	setShaderUniform(getUniformLoc("density"), 2);
-	setShaderUniform(getUniformLoc("width"), winWidth); 
-	setShaderUniform(getUniformLoc("height"), winHeight); 
+	glUniform1i(glGetUniformLocation(program_raycast, "raystart"), 0);
+	glUniform1i(glGetUniformLocation(program_raycast, "raystop"), 1);
+	glUniform1i(glGetUniformLocation(program_raycast, "density"), 2);
+	glUniform1i(glGetUniformLocation(program_raycast, "width"), winWidth);
+	glUniform1i(glGetUniformLocation(program_raycast, "height"), winHeight);
 
 	// フレームバッファとして０をバインドすることで、
 	// これ以降の描画は、実際のスクリーンに対して行われる。

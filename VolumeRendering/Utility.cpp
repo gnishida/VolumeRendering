@@ -2,8 +2,7 @@
 #include <fstream>
 #include <iostream>
 
-
-int LoadShader(char* filename, std::string& text) {
+int Util::LoadShader(char* filename, std::string& text) {
     std::ifstream ifs;
     ifs.open(filename, std::ios::in);
 
@@ -17,7 +16,7 @@ int LoadShader(char* filename, std::string& text) {
     return 0;
 }
 
-GLuint LoadProgram(const char* vsfile, const char* fsfile) {
+GLuint Util::LoadProgram(const char* vsfile, const char* fsfile) {
     //load vertex shader
     std::string vsPath = "shader/vs/"+std::string(vsfile)+".glsl";
 	std::string vsSourceStr;
@@ -81,23 +80,8 @@ GLuint LoadProgram(const char* vsfile, const char* fsfile) {
 
 }
 
-GLint getUniformLoc(const char* name) {
-    GLuint program;
-    glGetIntegerv(GL_CURRENT_PROGRAM, (GLint*) &program);
-    GLint location = glGetUniformLocation(program, name);
-    return location;
-}; 
-
-void setShaderUniform(GLint location, int v) {
-    glUniform1i(location, v);
-}
-
-void setShaderUniform(GLint location, float* v) {
-    glUniformMatrix4fv(location, 1, 0, v);
-}
-
 //create cubic information
-GLuint CreateCubeVao() {
+GLuint Util::CreateCubeVao() {
     float positions[] = { 
 		-1.0f, -1.0f, -1.0f, 
 		-1.0f, -1.0f,  1.0f, 
@@ -149,7 +133,7 @@ GLuint CreateCubeVao() {
     return vao;
 }
 
-GLuint CreateQuadVao() {
+GLuint Util::CreateQuadVao() {
     short positions[] = {
         -1, -1,
          1, -1,

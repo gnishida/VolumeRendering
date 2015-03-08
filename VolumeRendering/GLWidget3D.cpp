@@ -58,7 +58,7 @@ void GLWidget3D::initializeGL() {
 		qDebug() << "Error: " << glewGetErrorString(err);
 	}
 
-#if 1
+#if 0
 	// 盆栽の3Dデータを読み込む
 	FILE* fp = fopen("bonsai.raw", "r");
 	int width = 256;
@@ -98,7 +98,7 @@ void GLWidget3D::initializeGL() {
 	}
 #endif
 
-#if 0
+#if 1
 	// 球の形の3Dデータを作成する
 	int width = 128;
 	int height = 128;
