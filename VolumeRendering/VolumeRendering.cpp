@@ -2,16 +2,20 @@
 #include <iostream>
 #include "Utility.h"
 
-void VolumeRendering::init(int width, int height, int gridWidth, int gridHeight, int gridDepth) {
-	winWidth = width;
-	winHeight = height;
-    cubeVao = CreateCubeVao();
-    quadVao = CreateQuadVao();
-	
+void VolumeRendering::init(int winWidth, int winHeight, int gridWidth, int gridHeight, int gridDepth) {
+	this->winWidth = winWidth;
+	this->winHeight = winHeight;
+	this->gridWidth = gridWidth;
+	this->gridHeight = gridHeight;
+	this->gridDepth = gridDepth;
+
 	program_raycubeintersection = LoadProgram("rayboxintersectvs", "rayboxintersectfs");
     program_raycast = LoadProgram("raycastvs", "raycastfs");
 
-	createData(gridWidth, gridHeight, gridDepth);
+	createVolumeData(gridWidth, gridHeight, gridDepth);
+
+    cubeVao = CreateCubeVao();
+    quadVao = CreateQuadVao();
 	cubeinterFBO = cubeIntersectFBO(winWidth, winHeight); //raycasting intersection test texture
 
 	glDisable(GL_DEPTH_TEST);
@@ -177,14 +181,6 @@ void VolumeRendering::resetState() {
     glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_3D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_BLEND);
-}
-
-void VolumeRendering::createData(GLsizei width, GLsizei height, GLsizei depth) {
-	gridWidth = width;
-	gridHeight = height;
-	gridDepth = depth;
-
-	createVolumeData(gridWidth, gridHeight, gridDepth);
 }
 
 /**

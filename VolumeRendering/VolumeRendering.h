@@ -31,7 +31,7 @@ public:
 public:
 	VolumeRendering() {}
 
-	void init(int width, int height, int gridWidth, int gridHeight, int gridDepth);
+	void init(int winWidth, int winHeight, int gridWidth, int gridHeight, int gridDepth);
 	void setWindowSize(int width, int height);
 	void update();
 
@@ -41,7 +41,6 @@ public:
 
     void resetState(); //reset framebuffer, texture, etc after rendering
 
-	void createData(GLsizei gridwidth, GLsizei gridheight, GLsizei gridDepth);
 	void setDataVolume(float value);
 	CubeIntersectFBO cubeIntersectFBO(GLsizei width, GLsizei height);
 	void createVolumeData(GLsizei width, GLsizei height, GLsizei depth);
