@@ -1,19 +1,12 @@
 ﻿#include "DataManager.h"
 #include <iostream>
 
-void DataManager::createData(GLsizei width, GLsizei height, GLsizei depth){
+void DataManager::createData(GLsizei width, GLsizei height, GLsizei depth) {
 	_gridWidth = width;
 	_gridHeight = height;
 	_gridDepth = depth;
 
-	data = createCloudVolumeData(_gridWidth, _gridHeight, _gridDepth);
-}
-
-/**
- * 全ての3Dテクスチャの値を0にリセットする。
- */
-void DataManager::clearAllData(){
-	setDataVolume(data, 0);
+	createVolumeData(_gridWidth, _gridHeight, _gridDepth);
 }
 
 /**
@@ -24,10 +17,10 @@ void DataManager::clearAllData(){
  * @param datav		3Dテクスチャを含むデータ
  * @param v			セットする値
  */
-void DataManager::setDataVolume(DataVolume datav, float v){
+void DataManager::setDataVolume(float v) {
 	// datavのfboをバインドすることで、以降の描画命令は、
 	// このfboに括り付けられたテクスチャに対して行われる。
-    glBindFramebuffer(GL_FRAMEBUFFER, datav.fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
 
 	// クリアする色をセットする
     glClearColor(v, v, v, v);
@@ -44,8 +37,7 @@ void DataManager::setDataVolume(DataVolume datav, float v){
  * @param height	画面の高さ
  * @return			fboと対応する2Dテクスチャ
  */
-CubeIntersectFBO DataManager::cubeIntersectFBO(GLsizei width, GLsizei height)
-{
+CubeIntersectFBO DataManager::cubeIntersectFBO(GLsizei width, GLsizei height) {
     CubeIntersectFBO cubefbo;
 
 	// fboを生成する
@@ -70,11 +62,6 @@ CubeIntersectFBO DataManager::cubeIntersectFBO(GLsizei width, GLsizei height)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_HALF_FLOAT, 0); 
                
         if(GL_NO_ERROR != glGetError()){std::cout<<"Unable to create 2D texture"<<std::endl;}
-
-		// 以下の３行、なくても動作するみたい。不要のようだ。。。。
-        /*GLuint colorbuffer;
-        glGenRenderbuffers(1, &colorbuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, colorbuffer);*/
 
 		// 生成した2Dテクスチャを、fboに括り付ける。
 		// 以後、OpenGLに対しては、fboを指定することで、この2Dテクスチャにアクセスできるようになる。
@@ -106,7 +93,7 @@ CubeIntersectFBO DataManager::cubeIntersectFBO(GLsizei width, GLsizei height)
  * @param numComponents		コンポーネントの数 (各テクセルがscalarなら1、RGBベクトルなら3）
  * @return					FBOと対応する3Dテクスチャを返却する。
  */
-DataVolume DataManager::createCloudVolumeData(GLsizei width, GLsizei height, GLsizei depth){
+void DataManager::createVolumeData(GLsizei width, GLsizei height, GLsizei depth) {
 	// 雲データの作成
 	float sigma = (float)width * 0.3;
 	float* data = new float[width * height * depth];
@@ -125,16 +112,14 @@ DataVolume DataManager::createCloudVolumeData(GLsizei width, GLsizei height, GLs
 	}
 
 	//the FBO
-	GLuint fboId;
-	glGenFramebuffers(1, &fboId);
-	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+	glGenFramebuffers(1, &this->fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
 
 	// 3Dテクスチャを生成
-	GLuint textureId;
-	glGenTextures(1, &textureId);
+	glGenTextures(1, &this->texture);
 
 	// 生成した3Dテクスチャのパラメータを設定する
-	glBindTexture(GL_TEXTURE_3D, textureId);
+	glBindTexture(GL_TEXTURE_3D, this->texture);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -149,21 +134,11 @@ DataVolume DataManager::createCloudVolumeData(GLsizei width, GLsizei height, GLs
 
 	// 生成した3Dテクスチャを、fboに括り付ける。
 	// 以後、OpenGLに対しては、fboを指定することで、この3Dテクスチャにアクセスできるようになる。
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureId, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->texture, 0);
 
     if(GL_NO_ERROR != glGetError()){std::cout<<"Unable to bind texture to fbo"<<std::endl;}
 
-    DataVolume dataVolume = {fboId, textureId};
-
-	// 以下の初期化は、不要だった。
-	// こいつのせいで、せっかくセットしたテクスチャが全部消えちゃっていた。
-    //init the texture as black color(value 0)
-    //glClearColor(0, 0, 0, 0);
-    //glClear(GL_COLOR_BUFFER_BIT);
-
 	// 出力先をスクリーンに戻す
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    return dataVolume;
 }
 

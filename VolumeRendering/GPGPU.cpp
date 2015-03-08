@@ -13,33 +13,7 @@ float FOV = 60.0;
 float nearZ = 0.1;
 float farZ = 200.0;
 
-//default parameter setting, can be changed through GUI
-float view_rotate[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
-float trans_z[] = { 2 };
-float TemperatureDissipation = 0.99f;
-float VelocityDissipation = 0.99f;
-float DensityDissipation = 0.99f;
-float dt = 0.25f;
-int jacobiInter = 30;
-float buoyancy = 1.0f;
-float weight = 0.05f;
-float forceRadius = 4.8f; 
-float forceTemperature = 10.0f;
-float forceDensity = 1.0f;
-float forcePos[3] ={ gridWidth / 2.0f, forceRadius / 2.0f, gridDepth / 2.0f}; //bottom center
-
-//default parameters
-const float ambientTemperature = 0.0f;
-const float dx = 1.0f; //cell size
-const float gradientDivergedx = 1.125f / dx;
-const float pressureGradientrBeta = 0.1666f; 
-const float viscosity = 0; //for water like fluids, smoke and fire are partical like fluid, so viscosity is 0
-const float centerFactor = dx * dx / (viscosity * dt);
-const float stencilFactor = 1.0f / (6.0f + centerFactor);
-
-GPGPU::GPGPU(){}
-
-void GPGPU::init(int width, int height){
+void GPGPU::init(int width, int height) {
 	_winWidth = width;
 	_winHeight = height;
     _cube = CreateCubeVao();
@@ -186,7 +160,7 @@ void GPGPU::render(){
 
 	// 密度データを格納した3Dテクスチャを、テクスチャ２として使用する
 	//glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_3D, dataman.data.Density.cur.texture);
-	glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_3D, dataman.data.texture);
+	glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_3D, dataman.texture);
 
 	// クリアする色をセットする
     glClearColor(0, 0, 0, 0);

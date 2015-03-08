@@ -7,10 +7,9 @@ static struct {
     GLuint raycast;
 } ShaderPrograms;
 
-class GPGPU
-{
+class GPGPU {
 public:
-	GPGPU();
+	GPGPU() {}
 
 	void init(int width, int height);
 	void update();
