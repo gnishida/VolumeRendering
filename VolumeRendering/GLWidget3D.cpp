@@ -6,37 +6,30 @@
 #define SQR(x)	((x) * (x))
 
 GLWidget3D::GLWidget3D() {
-	this->setFixedSize(256, 256);
-
 	// set up the camera
 	camera.setLookAt(0.0f, 0.0f, 0.0f);
 	camera.setYRotation(0);
 	camera.setTranslation(0.0f, 0.0f, 2.0f);
-
 }
 
 /**
  * This event handler is called when the mouse press events occur.
  */
-void GLWidget3D::mousePressEvent(QMouseEvent *e)
-{
+void GLWidget3D::mousePressEvent(QMouseEvent *e) {
 	lastPos = e->pos();
-
 }
 
 /**
  * This event handler is called when the mouse release events occur.
  */
-void GLWidget3D::mouseReleaseEvent(QMouseEvent *e)
-{
+void GLWidget3D::mouseReleaseEvent(QMouseEvent *e) {
 	updateGL();
 }
 
 /**
  * This event handler is called when the mouse move events occur.
  */
-void GLWidget3D::mouseMoveEvent(QMouseEvent *e)
-{
+void GLWidget3D::mouseMoveEvent(QMouseEvent *e) {
 	float dx = (float)(e->x() - lastPos.x());
 	float dy = (float)(e->y() - lastPos.y());
 	lastPos = e->pos();
@@ -58,34 +51,20 @@ void GLWidget3D::mouseMoveEvent(QMouseEvent *e)
 /**
  * This function is called once before the first call to paintGL() or resizeGL().
  */
-void GLWidget3D::initializeGL()
-{
+void GLWidget3D::initializeGL() {
 	GLenum err = glewInit();
 	if (GLEW_OK != err){// Problem: glewInit failed, something is seriously wrong.
 		qDebug() << "Error: " << glewGetErrorString(err);
 	}
 
-	//glClearColor(0.443, 0.439, 0.458, 0.0);
-
-	/*glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_COLOR_MATERIAL);
-
-	static GLfloat lightPosition[4] = {0.0f, 0.0f, 100.0f, 0.0f};
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);*/
-
-	gpgpu = new GPGPU();
-	gpgpu->init(256, 256);
-
-	//timer.start(1000, this);
+	vr = new VolumeRendering();
+	vr->init(this->width(), this->height(), 128, 128, 128);
 }
 
 /**
  * This function is called whenever the widget has been resized.
  */
-void GLWidget3D::resizeGL(int width, int height)
-{
+void GLWidget3D::resizeGL(int width, int height) {
 	height = height?height:1;
 
     glViewport(0, 0, width, height);
@@ -97,30 +76,22 @@ void GLWidget3D::resizeGL(int width, int height)
     glMatrixMode(GL_MODELVIEW);     
     glLoadIdentity(); 
 
-	gpgpu->setWindowSize(width, height);
+	vr->setWindowSize(width, height);
 }
 
 /**
  * This function is called whenever the widget needs to be painted.
  */
-void GLWidget3D::paintGL()
-{
+void GLWidget3D::paintGL() {
 	//glMatrixMode(GL_MODELVIEW);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
 	camera.applyCamTransform();
-	glGetFloatv(GL_MODELVIEW_MATRIX, gpgpu->_modelviewMatrix);
+	glGetFloatv(GL_MODELVIEW_MATRIX, vr->modelviewMatrix);
 
-	drawScene();		
-}
-
-/**
- * Draw the scene.
- */
-void GLWidget3D::drawScene() {
-	gpgpu->update();
+	vr->update();	
 }
 
 QVector2D GLWidget3D::mouseTo2D(int x,int y) {

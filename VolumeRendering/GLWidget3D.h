@@ -8,7 +8,7 @@
 #include <QVector3D>
 #include <vector>
 #include <QBasicTimer>
-#include "GPGPU.h"
+#include "VolumeRendering.h"
 
 using namespace std;
 
@@ -18,12 +18,11 @@ class GLWidget3D : public QGLWidget {
 private:
 	Camera camera;
 	QPoint lastPos;
-	GPGPU* gpgpu;
+	VolumeRendering* vr;
 	QBasicTimer timer;
 
 public:
 	GLWidget3D();
-	void drawScene();
 	QVector2D mouseTo2D(int x,int y);
 
 protected:
