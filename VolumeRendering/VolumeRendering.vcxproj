@@ -223,15 +223,8 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\fs\advectfs.glsl" />
-    <None Include="shader\fs\boundaryfs.glsl" />
-    <None Include="shader\fs\buoyancyfs.glsl" />
-    <None Include="shader\fs\divergencefs.glsl" />
-    <None Include="shader\fs\forcefs.glsl" />
-    <None Include="shader\fs\jacobifs.glsl" />
     <None Include="shader\fs\rayboxintersectfs.glsl" />
     <None Include="shader\fs\raycastfs.glsl" />
-    <None Include="shader\fs\subgradientfs.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

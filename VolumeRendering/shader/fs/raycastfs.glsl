@@ -6,8 +6,6 @@ in vec2 vPosition;
 uniform sampler2D raystart;
 uniform sampler2D raystop;
 uniform sampler3D density;
-uniform sampler3D temperature;
-uniform int material; //0 smoke, 1 fire, 2 smoke&fire
 uniform int width; //window width
 uniform int height; //window width
 
@@ -21,7 +19,6 @@ const float stepSize = maxLen/float(sampleNum);
 const float lightStepSize = maxLen / float(lightsampleNum);
 const float densityScale = 10; //density number is too small to sample
 const float lightScale = 0.5; //scale of light color
-const float fireColorScale = 20; //scale of fire color
 const float absorbRate = 10.0; // light absorption rate by density
 
 void main()

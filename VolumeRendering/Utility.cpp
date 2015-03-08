@@ -2,12 +2,8 @@
 #include <fstream>
 #include <iostream>
 
-/********************************************************
-***********************SHADER LOADING ********************
-*********************************************************/
 
-int LoadShader(char* filename, std::string& text)
-{
+int LoadShader(char* filename, std::string& text) {
     std::ifstream ifs;
     ifs.open(filename, std::ios::in);
 
@@ -21,17 +17,11 @@ int LoadShader(char* filename, std::string& text)
     return 0;
 }
 
-GLuint LoadProgram(const char* vsfile, const char* gsfile, const char* fsfile)
-{
+GLuint LoadProgram(const char* vsfile, const char* fsfile) {
     //load vertex shader
     std::string vsPath = "shader/vs/"+std::string(vsfile)+".glsl";
 	std::string vsSourceStr;
     LoadShader((char*)vsPath.c_str(), vsSourceStr);
-
-    //load geometry shader
-    std::string gsPath = "shader/gs/"+std::string(gsfile)+".glsl";
-    std::string gsSourceStr;
-    LoadShader((char*)gsPath.c_str(), gsSourceStr);
 
     //load fragment shader
     std::string fsPath = "shader/fs/"+std::string(fsfile)+".glsl";
@@ -39,12 +29,10 @@ GLuint LoadProgram(const char* vsfile, const char* gsfile, const char* fsfile)
     LoadShader((char*)fsPath.c_str(), fsSourceStr);
 
     if (vsSourceStr.empty()) std::cout<<"Can't load vertex shader "<<vsfile<<std::endl;
-    if (gsfile[0]!=0 && gsSourceStr.empty()) std::cout<<"Can't load geometry shader "<<gsfile<<std::endl;
     if (fsfile!="" && fsSourceStr.empty()) std::cout<<"Can't load fragment shader "<<fsfile<<std::endl;
 
     //convert to const char
     const char* vsSource = vsSourceStr.c_str();
-    const char* gsSource = gsSourceStr.c_str();
     const char* fsSource = fsSourceStr.c_str();
 
     GLint compileSuccess;
@@ -62,19 +50,6 @@ GLuint LoadProgram(const char* vsfile, const char* gsfile, const char* fsfile)
         std::cout<<errorLog<<std::endl;
     }
     glAttachShader(programHandle, vsShader);
-
-    if(gsfile[0]!=0){
-        GLuint gsShader = glCreateShader(GL_GEOMETRY_SHADER);
-        glShaderSource(gsShader, 1, &gsSource, NULL);
-        glCompileShader(gsShader);
-        glGetShaderiv(gsShader, GL_COMPILE_STATUS, &compileSuccess);
-        if(compileSuccess == GL_FALSE){
-            glGetShaderInfoLog(gsShader, sizeof(errorLog), 0, errorLog);
-            std::cout<<"Can't compile geometry shader "<<gsfile<<std::endl;
-            std::cout<<errorLog<<std::endl;
-        }
-        glAttachShader(programHandle, gsShader);
-    }
 
     if(fsfile!=""){
         GLuint fsShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -98,7 +73,7 @@ GLuint LoadProgram(const char* vsfile, const char* gsfile, const char* fsfile)
 
     if (!linkSuccess) {
         glGetProgramInfoLog(programHandle, sizeof(errorLog), 0, errorLog);
-        std::cout<<"Link error.\n"<<"vs: "<<vsfile<<"gs: "<<gsfile<<"fs: "<<fsfile<<std::endl;
+        std::cout<<"Link error.\n"<<"vs: "<<vsfile<<"fs: "<<fsfile<<std::endl;
         std::cout<<errorLog<<std::endl;
     }
 
@@ -106,39 +81,23 @@ GLuint LoadProgram(const char* vsfile, const char* gsfile, const char* fsfile)
 
 }
 
-GLint getUniformLoc(const char* name){
+GLint getUniformLoc(const char* name) {
     GLuint program;
     glGetIntegerv(GL_CURRENT_PROGRAM, (GLint*) &program);
     GLint location = glGetUniformLocation(program, name);
     return location;
 }; 
 
-void setShaderUniform(GLint location, int v){
+void setShaderUniform(GLint location, int v) {
     glUniform1i(location, v);
 }
 
-void setShaderUniform(GLint location, float v){
-    glUniform1f(location, v);
-}
-
-void setShaderUniform(GLint location, float x, float y){
-    glUniform2f(location, x, y);
-}
-
-void setShaderUniform(GLint location, float x, float y, float z){
-    glUniform3f(location, x, y, z);
-}
-
-void setShaderUniform(GLint location, float* v){
+void setShaderUniform(GLint location, float* v) {
     glUniformMatrix4fv(location, 1, 0, v);
 }
 
-/********************************************************
-*********************************************************/
-
 //create cubic information
-GLuint CreateCubeVao()
-{
+GLuint CreateCubeVao() {
     float positions[] = { 
 		-1.0f, -1.0f, -1.0f, 
 		-1.0f, -1.0f,  1.0f, 
@@ -190,8 +149,7 @@ GLuint CreateCubeVao()
     return vao;
 }
 
-GLuint CreateQuadVao()
-{
+GLuint CreateQuadVao() {
     short positions[] = {
         -1, -1,
          1, -1,

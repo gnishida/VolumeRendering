@@ -101,28 +101,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\fs\advectfs.glsl">
-      <Filter>Source Files\shader\fs</Filter>
-    </None>
-    <None Include="shader\fs\buoyancyfs.glsl">
-      <Filter>Source Files\shader\fs</Filter>
-    </None>
-    <None Include="shader\fs\boundaryfs.glsl">
-      <Filter>Source Files\shader\fs</Filter>
-    </None>
-    <None Include="shader\fs\divergencefs.glsl">
-      <Filter>Source Files\shader\fs</Filter>
-    </None>
-    <None Include="shader\fs\forcefs.glsl">
-      <Filter>Source Files\shader\fs</Filter>
-    </None>
-    <None Include="shader\fs\jacobifs.glsl">
-      <Filter>Source Files\shader\fs</Filter>
-    </None>
     <None Include="shader\fs\rayboxintersectfs.glsl">
-      <Filter>Source Files\shader\fs</Filter>
-    </None>
-    <None Include="shader\fs\subgradientfs.glsl">
       <Filter>Source Files\shader\fs</Filter>
     </None>
     <None Include="shader\fs\raycastfs.glsl">

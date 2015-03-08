@@ -1,12 +1,12 @@
 ﻿#include "GPGPU.h"
 #include <iostream>
 
-# define M_PI           3.14159265358979323846
+#define M_PI           3.14159265358979323846
 
 //volume info
-int gridWidth = 32;//128;
-int gridHeight = 32;//128;
-int gridDepth = 32;//128;
+int gridWidth = 128;
+int gridHeight = 128;
+int gridDepth = 128;
 
 //camera info
 float FOV = 60.0;
@@ -28,12 +28,12 @@ void GPGPU::init(int width, int height) {
     glEnableVertexAttribArray(0);
 }
 
-void GPGPU::setWindowSize(int width, int height){
+void GPGPU::setWindowSize(int width, int height) {
 	_winWidth = width;
 	_winHeight = height;
 }
 
-void GPGPU::update(){
+void GPGPU::update() {
     // 画面サイズなどから、projectionMatrixを計算する
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -64,9 +64,9 @@ void GPGPU::update(){
     render();
 }
 
-void GPGPU::loadShaderProgram(){
-    ShaderPrograms.raycubeintersection = LoadProgram("rayboxintersectvs", "", "rayboxintersectfs");
-    ShaderPrograms.raycast = LoadProgram("raycastvs", "", "raycastfs");
+void GPGPU::loadShaderProgram() {
+    ShaderPrograms.raycubeintersection = LoadProgram("rayboxintersectvs", "rayboxintersectfs");
+    ShaderPrograms.raycast = LoadProgram("raycastvs", "raycastfs");
 }
 
 /**
@@ -75,7 +75,7 @@ void GPGPU::loadShaderProgram(){
  *
  * @param dest		キューブの前面／背面の交点の座標を計算するためのfboと２つの2Dテクスチャ
  */
-void GPGPU::rayCubeIntersection(CubeIntersectFBO dest){
+void GPGPU::rayCubeIntersection(CubeIntersectFBO dest) {
 	// キューブの前面／背面の交点を計算するGPUシェーダを選択
 	glUseProgram(ShaderPrograms.raycubeintersection);
     
@@ -128,7 +128,7 @@ void GPGPU::rayCubeIntersection(CubeIntersectFBO dest){
 	resetState();
 }
 
-void GPGPU::render(){
+void GPGPU::render() {
 	// raycastするGPUシェーダを選択
 	// rayCubeIntersectionと違い、modelviewMatrixやprojectionMatrixを使わないことに注意！
 	// デフォルトのままなので、つまり、(-1,-1)-(1,1)のOrtho射影を使用する。
@@ -187,12 +187,10 @@ void GPGPU::render(){
 	resetState();
 }
 
-void GPGPU::resetState()
-{
+void GPGPU::resetState() {
     glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_3D, 0);
     glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_3D, 0);
     glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_3D, 0);
-	glActiveTexture(GL_TEXTURE3); glBindTexture(GL_TEXTURE_3D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_BLEND);
 }
