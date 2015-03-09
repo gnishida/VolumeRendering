@@ -53,57 +53,8 @@ void GLWidget3D::initializeGL() {
 	float* data;
 	int width, height, depth;
 	//Util::loadVTK("vfhead-smooth-small.vtk", width, height, depth, &data);
-	Util::loadVTK("delta-vorticitymag.vtk", width, height, depth, &data);
-#endif
-
-#if 0
-	// 盆栽の3Dデータを読み込む
-	FILE* fp = fopen("bonsai.raw", "rb");
-	int width = 256;
-	int height = 256;
-	int depth = 256;
-	uchar max_val = 0;
-	uchar min_val = 999;
-	float* data = new float[width * height * depth];
-	for (int x = 0; x < width; ++x) {
-		for (int y = 0; y < height; ++y) {
-			for (int z = 0; z < depth; ++z) {
-				uchar val;
-				fread(&val, 1, 1, fp);
-
-				if (val > max_val) {
-					max_val = val;
-				}
-				if (val < min_val) {
-					min_val = val;
-				}
-				data[z * width * height + y * width + x] = (float)val / 256.0f;
-			}
-		}
-	}
-	printf("max_val: %d, min_val: %d\n", max_val, min_val);
-#endif
-
-#if 0
-	// 頭の3Dデータを読み込む
-	std::vector<QImage> imgs;
-	for (int i = 1; i < 100; ++i) {
-		char filename[256];
-		sprintf(filename, "data/cthead-8bit%03d.tif", i);
-		imgs.push_back(QImage(filename));
-	}
-
-	int width = imgs[0].width();
-	int height = imgs[0].height();
-	int depth = imgs.size();
-	float* data = new float[width * height * depth];
-	for (int z = 0; z < depth; ++z) {
-		for (int y = 0; y < height; ++y) {
-			for (int x = 0; x < width; ++x) {
-				data[z * width * height + y * width + x] = (float)qGray(imgs[z].pixel(x, y)) / 255.0f;
-			}
-		}
-	}
+	//Util::loadVTK("delta-vorticitymag.vtk", width, height, depth, &data);
+	Util::loadVTK("bonsai.vtk", width, height, depth, &data);
 #endif
 
 #if 0
