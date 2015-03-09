@@ -8,23 +8,22 @@
 #define SQR(x)	((x) * (x))
 
 GLWidget3D::GLWidget3D() {
-	// set up the camera
-	camera.setLookAt(0.0f, 0.0f, 0.0f);
-	camera.setYRotation(0);
-	camera.setTranslation(0.0f, 0.0f, 2.0f);
+	camera.setRotatonSensitivity(0.003);
+	camera.setZoomSensitivity(0.01);
 }
 
 /**
  * This event handler is called when the mouse press events occur.
  */
 void GLWidget3D::mousePressEvent(QMouseEvent *e) {
-	lastPos = e->pos();
+	camera.mouseDown(e->x(), e->y());
 }
 
 /**
  * This event handler is called when the mouse release events occur.
  */
 void GLWidget3D::mouseReleaseEvent(QMouseEvent *e) {
+	camera.mouseUp();
 	updateGL();
 }
 
@@ -32,19 +31,10 @@ void GLWidget3D::mouseReleaseEvent(QMouseEvent *e) {
  * This event handler is called when the mouse move events occur.
  */
 void GLWidget3D::mouseMoveEvent(QMouseEvent *e) {
-	float dx = (float)(e->x() - lastPos.x());
-	float dy = (float)(e->y() - lastPos.y());
-	lastPos = e->pos();
-
 	if (e->buttons() & Qt::LeftButton) {
-		camera.changeXRotation(dy);
-		camera.changeYRotation(dx);
+		camera.rotate(e->x(), e->y());
 	} else if (e->buttons() & Qt::RightButton) {
-		camera.changeXYZTranslation(0, 0, -dy * camera.dz * 0.02f);
-		if (camera.dz < -9000) camera.dz = -9000;
-		if (camera.dz > 9000) camera.dz = 9000;
-	} else if (e->buttons() & Qt::MidButton) {
-		camera.changeXYZTranslation(-dx, dy, 0);
+		camera.zoom(e->x(), e->y());
 	}
 
 	updateGL();
@@ -56,14 +46,14 @@ void GLWidget3D::mouseMoveEvent(QMouseEvent *e) {
 void GLWidget3D::initializeGL() {
 	GLenum err = glewInit();
 	if (GLEW_OK != err){// Problem: glewInit failed, something is seriously wrong.
-		qDebug() << "Error: " << glewGetErrorString(err);
+		std::cout << "Error: " << glewGetErrorString(err);
 	}
 
 #if 1
 	float* data;
 	int width, height, depth;
-	Util::loadVTK("vfhead-smooth-small.vtk", width, height, depth, &data);
-	//Util::loadVTK("delta-vorticitymag.vtk", width, height, depth, &data);
+	//Util::loadVTK("vfhead-smooth-small.vtk", width, height, depth, &data);
+	Util::loadVTK("delta-vorticitymag.vtk", width, height, depth, &data);
 #endif
 
 #if 0
@@ -172,7 +162,9 @@ void GLWidget3D::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
-	camera.applyCamTransform();
+    glLoadIdentity();
+    glTranslatef(0.0, 0.0, -camera.z);
+	glMultMatrixd(camera.rt);
 	glGetFloatv(GL_MODELVIEW_MATRIX, vr->modelviewMatrix);
 
 	vr->update();	

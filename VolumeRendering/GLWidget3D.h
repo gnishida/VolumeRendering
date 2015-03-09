@@ -5,7 +5,7 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include "Camera.h"
-#include <QVector3D>
+#include <QVector2D>
 #include <vector>
 #include <QBasicTimer>
 #include "VolumeRendering.h"
