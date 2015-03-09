@@ -14,5 +14,5 @@ public:
 	static GLuint CreateCubeVao();
 	static GLuint CreateQuadVao();
 
-	static void loadVTK(char* filename, int& width, int& height, int& depth, float** data);
+	static bool loadVTK(char* filename, int& width, int& height, int& depth, float** data);
 };

@@ -1,4 +1,4 @@
-#include "Util.h"
+﻿#include "Util.h"
 #include <fstream>
 #include <iostream>
 
@@ -161,20 +161,79 @@ GLuint Util::CreateQuadVao() {
     return vao;
 }
 
-void Util::loadVTK(char* filename, int& width, int& height, int& depth, float** data) {
+/**
+ * VTKファイルフォーマットの3Dデータを読み込む。
+ * ただし、STRUCTURED_POINTSで、unsigned shortしか対応していない。
+ * 読み込み失敗すると、falseを返却する。
+ *
+ * @param filename		VTKファイル名
+ * @param width	[OUT]	3Dデータの幅
+ * @param height [OUT]	3Dデータの高さ
+ * @param depth [OUT]	3Dデータの奥行き
+ * @param data			3Dデータ
+ * @return				読み込み成功ならtrueを返却する
+ */
+bool Util::loadVTK(char* filename, int& width, int& height, int& depth, float** data) {
 	FILE* fp = fopen(filename, "rb");
 
+	char buff[256];
+	bool binary_file = false;
+
+	// read file header
 	while (true) {
-		char buff[1024];
-		fgets(buff, 1024, fp);
+		fgets(buff, 256, fp);
 
 		if (strncmp(buff, "#", 1) == 0) {
 			// skip
-		} else if (strncmp(buff, "LOOKUP_TABLE", 12) == 0) {
+		} else if (strncmp(buff, "BINARY", 6) == 0) {
+			binary_file = true;
 			break;
-		} else if (strncmp(buff, "DIMENSIONS", 10) == 0) {
-			sscanf(buff, "DIMENSIONS %d %d %d", &width, &height, &depth);
-			printf("width: %d, height: %d, depth: %d\n", width, height, depth);
+		} else if (strncmp(buff, "ASCII", 5) == 0) {
+			binary_file = false;
+			break;
+		}
+	}
+
+	// read data structure
+	{
+		fgets(buff, 256, fp);
+		if (strncmp(buff, "DATASET STRUCTURED_POINTS", 7) != 0) {
+			return false;
+		}
+
+		while (true) {
+			fgets(buff, 256, fp);
+
+			if (strncmp(buff, "DIMENSIONS", 10) == 0) {
+				sscanf(buff, "DIMENSIONS %d %d %d", &width, &height, &depth);
+				printf("width: %d, height: %d, depth: %d\n", width, height, depth);
+			} else if (strncmp(buff, "POINT_DATA", 10) == 0) {
+				break;
+			}
+		}
+	}
+
+	// read scalars
+	{
+		fgets(buff, 256, fp);
+		if (strncmp(buff, "SCALARS", 7) != 0) {
+			return false;
+		}
+
+		char name[256];
+		char type[256];
+		sscanf(buff, "SCALARS %s %s", name, type);
+
+		if (strncmp(type, "unsigned_short", 14) != 0) {
+			return false;
+		}
+	}
+
+	// read lookup table
+	{
+		fgets(buff, 256, fp);
+		if (strncmp(buff, "LOOKUP_TABLE", 12) != 0) {
+			return false;
 		}
 	}
 
@@ -182,19 +241,17 @@ void Util::loadVTK(char* filename, int& width, int& height, int& depth, float** 
 	unsigned short min_val = 99999;
 	*data = new float[width * height * depth];
 	for (int i = 0; i < width * height * depth; ++i) {
-		unsigned short val;
-		fread(&val, sizeof(unsigned short), 1, fp);
+		unsigned char raw_val[2];
+		fread(&raw_val, sizeof(unsigned char), 2, fp);
 
-		if (val > max_val) {
-			max_val = val;
-		}
-		if (val < min_val) {
-			min_val = val;
-		}
+		unsigned short val = raw_val[0] * 256 + raw_val[1];
+
 		(*data)[i] = (float)val / 65536.0f;
 	}
 
 	printf("max val: %d, min_val: %d\n", max_val, min_val);
 
 	fclose(fp);
+
+	return true;
 }

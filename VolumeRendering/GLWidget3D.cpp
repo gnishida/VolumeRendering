@@ -59,13 +59,14 @@ void GLWidget3D::initializeGL() {
 		qDebug() << "Error: " << glewGetErrorString(err);
 	}
 
-#if 0
+#if 1
 	float* data;
 	int width, height, depth;
-	Util::loadVTK("delta-vorticitymag.vtk", width, height, depth, &data);
+	Util::loadVTK("vfhead-smooth-small.vtk", width, height, depth, &data);
+	//Util::loadVTK("delta-vorticitymag.vtk", width, height, depth, &data);
 #endif
 
-#if 1
+#if 0
 	// 盆栽の3Dデータを読み込む
 	FILE* fp = fopen("bonsai.raw", "rb");
 	int width = 256;
