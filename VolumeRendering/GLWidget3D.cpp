@@ -82,8 +82,6 @@ void GLWidget3D::resizeGL(int width, int height) {
  * This function is called whenever the widget needs to be painted.
  */
 void GLWidget3D::paintGL() {
-	//glMatrixMode(GL_MODELVIEW);
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);

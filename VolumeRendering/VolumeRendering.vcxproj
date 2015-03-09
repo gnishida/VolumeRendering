@@ -221,12 +221,8 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\fs\rayboxintersectfs.glsl" />
-    <None Include="shader\fs\raycast2fs.glsl" />
-    <None Include="shader\fs\raycastfs.glsl" />
-    <None Include="shader\vs\rayboxintersectvs.glsl" />
-    <None Include="shader\vs\raycast2vs.glsl" />
-    <None Include="shader\vs\raycastvs.glsl" />
+    <None Include="shader\raycastfs.glsl" />
+    <None Include="shader\raycastvs.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

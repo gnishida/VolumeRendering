@@ -5,11 +5,6 @@
 #include <QImage>
 #include <QVector3D>
 
-struct CubeIntersectFBO {
-	GLuint fbo;
-	GLuint texture[2];
-};
-
 class VolumeRendering {
 private:
 	int winWidth;
@@ -17,11 +12,8 @@ private:
 
 	GLuint cubeVao;
     GLuint quadVao;
-	CubeIntersectFBO cubeinterFBO;
 
-	GLuint program_raycast2;
-	GLuint program_raycubeintersection;
-	GLuint program_raycast;
+	GLuint program;
 
 	GLuint fbo;
 	GLuint texture;
@@ -39,9 +31,6 @@ public:
 	void update(const QVector3D& cameraPos);
 
 private:
-	void render2(const QVector3D& cameraPos);
-	void rayCubeIntersection(CubeIntersectFBO dest);
-	void render();
-	void cubeIntersectFBO(GLsizei width, GLsizei height);
+	void render(const QVector3D& cameraPos);
 };
 

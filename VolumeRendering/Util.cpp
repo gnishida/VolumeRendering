@@ -18,12 +18,12 @@ int Util::LoadShader(char* filename, std::string& text) {
 
 GLuint Util::LoadProgram(const char* vsfile, const char* fsfile) {
     //load vertex shader
-    std::string vsPath = "shader/vs/"+std::string(vsfile)+".glsl";
+    std::string vsPath = "shader/"+std::string(vsfile)+".glsl";
 	std::string vsSourceStr;
     LoadShader((char*)vsPath.c_str(), vsSourceStr);
 
     //load fragment shader
-    std::string fsPath = "shader/fs/"+std::string(fsfile)+".glsl";
+    std::string fsPath = "shader/"+std::string(fsfile)+".glsl";
     std::string fsSourceStr;
     LoadShader((char*)fsPath.c_str(), fsSourceStr);
 
