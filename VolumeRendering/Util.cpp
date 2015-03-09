@@ -162,7 +162,7 @@ GLuint Util::CreateQuadVao() {
 }
 
 void Util::loadVTK(char* filename, int& width, int& height, int& depth, float** data) {
-	FILE* fp = fopen(filename, "r");
+	FILE* fp = fopen(filename, "rb");
 
 	while (true) {
 		char buff[1024];
@@ -174,15 +174,34 @@ void Util::loadVTK(char* filename, int& width, int& height, int& depth, float** 
 			break;
 		} else if (strncmp(buff, "DIMENSIONS", 10) == 0) {
 			sscanf(buff, "DIMENSIONS %d %d %d", &width, &height, &depth);
+			printf("width: %d, height: %d, depth: %d\n", width, height, depth);
 		}
 	}
 
+	unsigned short max_val = 0;
+	unsigned short min_val = 99999;
 	*data = new float[width * height * depth];
 	for (int i = 0; i < width * height * depth; ++i) {
 		unsigned short val;
-		fread(&val, 1, 1, fp);
-		(*data)[i] = (float)val / 256.0f;
+		fread(&val, sizeof(unsigned short), 1, fp);
+
+		if (val > max_val) {
+			max_val = val;
+		}
+		if (val < min_val) {
+			min_val = val;
+		}
+		(*data)[i] = (float)val / 1000.0f;
 	}
+
+	printf("max val: %d, min_val: %d\n", max_val, min_val);
+
+	// normalize
+	/*
+	for (int i = 0; i < width * height * depth; ++i) {
+		(*data)[i] = (float)((*data)[i] - min_val) / (float)(max_val - min_val);
+	}
+	*/
 
 	fclose(fp);
 }

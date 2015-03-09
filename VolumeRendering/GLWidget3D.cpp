@@ -59,28 +59,38 @@ void GLWidget3D::initializeGL() {
 		qDebug() << "Error: " << glewGetErrorString(err);
 	}
 
-#if 1
+#if 0
 	float* data;
 	int width, height, depth;
 	Util::loadVTK("delta-vorticitymag.vtk", width, height, depth, &data);
 #endif
 
-#if 0
+#if 1
 	// 盆栽の3Dデータを読み込む
-	FILE* fp = fopen("bonsai.raw", "r");
+	FILE* fp = fopen("bonsai.raw", "rb");
 	int width = 256;
 	int height = 256;
 	int depth = 256;
+	uchar max_val = 0;
+	uchar min_val = 999;
 	float* data = new float[width * height * depth];
 	for (int x = 0; x < width; ++x) {
 		for (int y = 0; y < height; ++y) {
 			for (int z = 0; z < depth; ++z) {
 				uchar val;
 				fread(&val, 1, 1, fp);
-				data[z * width * height + y * width + x] = (float)val - 40.0f;
+
+				if (val > max_val) {
+					max_val = val;
+				}
+				if (val < min_val) {
+					min_val = val;
+				}
+				data[z * width * height + y * width + x] = (float)val / 256.0f;
 			}
 		}
 	}
+	printf("max_val: %d, min_val: %d\n", max_val, min_val);
 #endif
 
 #if 0
