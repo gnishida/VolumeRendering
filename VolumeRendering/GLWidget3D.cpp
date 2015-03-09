@@ -49,41 +49,9 @@ void GLWidget3D::initializeGL() {
 		std::cout << "Error: " << glewGetErrorString(err);
 	}
 
-#if 1
-	float* data;
-	int width, height, depth;
-	//Util::loadVTK("vfhead-smooth-small.vtk", width, height, depth, &data);
-	//Util::loadVTK("delta-vorticitymag.vtk", width, height, depth, &data);
-	Util::loadVTK("bonsai.vtk", width, height, depth, &data);
-#endif
-
-#if 0
-	// 球の形の3Dデータを作成する
-	int width = 128;
-	int height = 128;
-	int depth = 128;
-	float sigma = (float)width * 0.3;
-	float* data = new float[width * height * depth];
-	for (int x = 0; x < width; ++x) {
-		for (int y = 0; y < height; ++y) {
-			for (int z = 0; z < depth; ++z) {
-				float dist = (x - width * 0.5) * (x - width * 0.5)  + (y - height * 0.5) * (y - height * 0.5) + (z - depth * 0.5) * (z - depth * 0.5);
-				
-				if (dist < sigma * sigma) {
-					data[z * width * height + y * width + x] = expf(-dist/2.0/sigma/sigma);
-				} else {
-					data[z * width * height + y * width + x] = 0.0f;
-				}
-			}
-		}
-	}
-#endif
-
 	// Volume Renderingを初期化
 	vr = new VolumeRendering(this->width(), this->height());
-	vr->setVolumeData(width, height, depth, data);
 
-	delete [] data;
 }
 
 /**
@@ -141,8 +109,14 @@ QVector2D GLWidget3D::mouseTo2D(int x,int y) {
 	return QVector2D(posX, posY);
 }
 
-void GLWidget3D::timerEvent(QTimerEvent* e) {
-	//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+void GLWidget3D::loadVTK(char* filename) {
+	float* data;
+	int width, height, depth;
+	Util::loadVTK(filename, width, height, depth, &data);
 
-	//updateGL();
+	vr->setVolumeData(width, height, depth, data);
+
+	delete [] data;
+
+	updateGL();
 }

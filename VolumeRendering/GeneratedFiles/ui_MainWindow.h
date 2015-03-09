@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created: Mon Mar 9 11:26:35 2015
+** Created: Mon Mar 9 12:21:35 2015
 **      by: Qt User Interface Compiler version 4.8.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -28,7 +28,7 @@ class Ui_MainWindowClass
 {
 public:
     QAction *actionExit;
-    QAction *actionStart;
+    QAction *actionOpen;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
@@ -42,8 +42,8 @@ public:
         MainWindowClass->resize(600, 400);
         actionExit = new QAction(MainWindowClass);
         actionExit->setObjectName(QString::fromUtf8("actionExit"));
-        actionStart = new QAction(MainWindowClass);
-        actionStart->setObjectName(QString::fromUtf8("actionStart"));
+        actionOpen = new QAction(MainWindowClass);
+        actionOpen->setObjectName(QString::fromUtf8("actionOpen"));
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -61,7 +61,7 @@ public:
         MainWindowClass->setStatusBar(statusBar);
 
         menuBar->addAction(menuFile->menuAction());
-        menuFile->addAction(actionStart);
+        menuFile->addAction(actionOpen);
         menuFile->addSeparator();
         menuFile->addAction(actionExit);
 
@@ -74,7 +74,7 @@ public:
     {
         MainWindowClass->setWindowTitle(QApplication::translate("MainWindowClass", "MainWindow", 0, QApplication::UnicodeUTF8));
         actionExit->setText(QApplication::translate("MainWindowClass", "Exit", 0, QApplication::UnicodeUTF8));
-        actionStart->setText(QApplication::translate("MainWindowClass", "Start", 0, QApplication::UnicodeUTF8));
+        actionOpen->setText(QApplication::translate("MainWindowClass", "Open", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "File", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 

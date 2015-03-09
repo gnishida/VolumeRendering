@@ -27,7 +27,7 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionStart"/>
+    <addaction name="actionOpen"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -47,9 +47,9 @@
     <string>Exit</string>
    </property>
   </action>
-  <action name="actionStart">
+  <action name="actionOpen">
    <property name="text">
-    <string>Start</string>
+    <string>Open</string>
    </property>
   </action>
  </widget>

@@ -249,8 +249,6 @@ bool Util::loadVTK(char* filename, int& width, int& height, int& depth, float** 
 		(*data)[i] = (float)val / 65536.0f;
 	}
 
-	printf("max val: %d, min_val: %d\n", max_val, min_val);
-
 	fclose(fp);
 
 	return true;

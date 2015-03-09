@@ -24,6 +24,7 @@ private:
 public:
 	GLWidget3D();
 	QVector2D mouseTo2D(int x,int y);
+	void loadVTK(char* filename);
 
 protected:
 	void initializeGL();
@@ -32,6 +33,5 @@ protected:
 	void mousePressEvent(QMouseEvent *e);
 	void mouseMoveEvent(QMouseEvent *e);
 	void mouseReleaseEvent(QMouseEvent *e);
-	void timerEvent(QTimerEvent* e);
 };
 

@@ -19,7 +19,7 @@ public:
 	~MainWindow();
 
 public slots:
-	void onStart();
+	void onOpen();
 };
 
 #endif // MAINWINDOW_H
