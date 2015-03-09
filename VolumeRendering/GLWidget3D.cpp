@@ -8,22 +8,19 @@
 #define SQR(x)	((x) * (x))
 
 GLWidget3D::GLWidget3D() {
-	camera.setRotatonSensitivity(0.003);
-	camera.setZoomSensitivity(0.01);
 }
 
 /**
  * This event handler is called when the mouse press events occur.
  */
 void GLWidget3D::mousePressEvent(QMouseEvent *e) {
-	camera.mouseDown(e->x(), e->y());
+	lastPos = e->pos();
 }
 
 /**
  * This event handler is called when the mouse release events occur.
  */
 void GLWidget3D::mouseReleaseEvent(QMouseEvent *e) {
-	camera.mouseUp();
 	updateGL();
 }
 
@@ -31,10 +28,19 @@ void GLWidget3D::mouseReleaseEvent(QMouseEvent *e) {
  * This event handler is called when the mouse move events occur.
  */
 void GLWidget3D::mouseMoveEvent(QMouseEvent *e) {
+	float dx = (float)(e->x() - lastPos.x());
+	float dy = (float)(e->y() - lastPos.y());
+	lastPos = e->pos();
+
 	if (e->buttons() & Qt::LeftButton) {
-		camera.rotate(e->x(), e->y());
+		camera.changeXRotation(dy);
+		camera.changeYRotation(dx);
 	} else if (e->buttons() & Qt::RightButton) {
-		camera.zoom(e->x(), e->y());
+		camera.changeXYZTranslation(0, 0, -dy * camera.dz * 0.02f);
+		if (camera.dz < -9000) camera.dz = -9000;
+		if (camera.dz > 9000) camera.dz = 9000;
+	} else if (e->buttons() & Qt::MidButton) {
+		camera.changeXYZTranslation(-dx, dy, 0);
 	}
 
 	updateGL();
@@ -81,12 +87,11 @@ void GLWidget3D::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glTranslatef(0.0, 0.0, -camera.z);
-	glMultMatrixd(camera.rt);
+	camera.applyCamTransform();
 	glGetFloatv(GL_MODELVIEW_MATRIX, vr->modelviewMatrix);
 
-	vr->update();	
+
+	vr->update(QVector3D(camera.getCamPos()));
 }
 
 QVector2D GLWidget3D::mouseTo2D(int x,int y) {

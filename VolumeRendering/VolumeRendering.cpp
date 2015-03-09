@@ -6,6 +6,7 @@ VolumeRendering::VolumeRendering(int winWidth, int winHeight) {
 	this->winWidth = winWidth;
 	this->winHeight = winHeight;
 
+    program_raycast2 = Util::LoadProgram("raycast2vs", "raycast2fs");
 	program_raycubeintersection = Util::LoadProgram("rayboxintersectvs", "rayboxintersectfs");
     program_raycast = Util::LoadProgram("raycastvs", "raycastfs");
 
@@ -87,7 +88,7 @@ void VolumeRendering::setWindowSize(int width, int height) {
 	winHeight = height;
 }
 
-void VolumeRendering::update() {
+void VolumeRendering::update(const QVector3D& cameraPos) {
     // 画面サイズなどから、projectionMatrixを計算する
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -108,11 +109,73 @@ void VolumeRendering::update() {
 	glMatrixMode(GL_MODELVIEW);
 	*/
 
+	render2(cameraPos);
+
     // RayCastのための、キューブの前面／背面の交点を計算する
-    rayCubeIntersection(cubeinterFBO);
+    //rayCubeIntersection(cubeinterFBO);
 
     // RayCastを実施して、スクリーンに描画する
-    render();
+    //render();
+}
+
+/**
+ * 画面のピクセルに対応する、キューブの前面／背面の交点を計算し、
+ * destに括りついた２つの2Dテクスチャにそれぞれ格納する。
+ *
+ * @param dest		キューブの前面／背面の交点の座標を計算するためのfboと２つの2Dテクスチャ
+ */
+void VolumeRendering::render2(const QVector3D& cameraPos) {
+	// キューブの前面／背面の交点を計算するGPUシェーダを選択
+	glUseProgram(program_raycast2);
+    
+	// GPUシェーダに、パラメータを渡す
+	// シミュレーションをしているキューブが、ワールド座標系の原点を中心として、
+	// (-1,-1,-1) - (1,1,1)のサイズである。
+	// これに対して、カメラが移動しているので、このキューブを回転、移動しなければいけない。
+	// なので、modelviewMatrixとprojectionMatrixをカメラの位置などに基づいて計算し、
+	// シェーダに渡している。
+	glUniformMatrix4fv(glGetUniformLocation(program_raycast2, "modelviewMatrix"), 1, 0, (float*)&modelviewMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(program_raycast2, "projectionMatrix"), 1, 0, (float*)&projectionMatrix);
+	glUniform3f(glGetUniformLocation(program_raycast2, "cameraPos"), cameraPos.x(), cameraPos.y(), cameraPos.z());
+    glUniform1i(glGetUniformLocation(program_raycast2, "density"), 0);
+
+	// フレームバッファとして０をバインドすることで、
+	// これ以降の描画は、実際のスクリーンに対して行われる。
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// 密度データを格納した3Dテクスチャを、テクスチャ２として使用する
+	glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_3D, texture);
+
+	// rayと交差する２つの三角形のうち、カメラから遠いほうは、表面ではなく、背面から
+	// rayが当たるため、GL_CULL_FACEしちゃうと、rayが当たってないとして無視されちゃうので、
+	// GL_CULL_FACEを無効にする。
+	glDisable(GL_CULL_FACE);
+
+	// GL_ONE、GL_ONEを指定してBLENDすることで、画面の各ピクセルに対応する２つの三角形の
+	// ワールド座標系での座標を、ORを使って、両方ともうまいこと記録できる。
+	// （詳細は、rayboxintersectfs.glslを参照のこと）
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// クリアする色(0,0,0,0)を指定し、全画面をクリアする。
+	// これにより、画面の各ピクセルに対応する、キューブとの交点は0に初期化された
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+	// rayboxintersectfs.glslシェーダ：
+	// 画面上の各ピクセルに対応するrayは、キューブを構成する６面、つまり、１２個の三角形の
+	// のうち、２つと交差する。
+	// このうち、カメラに近い側の交点のワールド座標系での座標が、glFragColor[0]の対応するテクセルに、
+	// 色情報として格納される。
+	// つまり、該当テクセルのRGBとして、実際にはXYZが格納される。
+	// また、カメラから遠い側の交点のワールド座標系での座標が、glFragColor[1]の対応するテクセルに、
+	// 同様に、色情報として格納される。
+    glBindVertexArray(cubeVao);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0); // 頂点をindexで指定するので、glDrawElementsを使う
+	                                                        // また、index数は36個あるので、引数は36。
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDisable(GL_BLEND);
 }
 
 /**

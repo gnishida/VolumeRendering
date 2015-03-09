@@ -127,7 +127,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_MainWindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -223,7 +222,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\fs\rayboxintersectfs.glsl" />
+    <None Include="shader\fs\raycast2fs.glsl" />
     <None Include="shader\fs\raycastfs.glsl" />
+    <None Include="shader\vs\rayboxintersectvs.glsl" />
+    <None Include="shader\vs\raycast2vs.glsl" />
+    <None Include="shader\vs\raycastvs.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

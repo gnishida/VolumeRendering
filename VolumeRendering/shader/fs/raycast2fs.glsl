@@ -1,13 +1,10 @@
 #version 330
 
+in vec3 vPosition;
 out vec4 glFragColor;
-in vec2 vPosition;
 
-uniform sampler2D raystart;
-uniform sampler2D raystop;
 uniform sampler3D density;
-uniform int width; //window width
-uniform int height; //window width
+uniform vec3 cameraPos;
 
 uniform vec3 lightPos = vec3(1.0, 1.0, 2.0);
 uniform vec3 lightColor = vec3(10.0);
@@ -23,14 +20,24 @@ const float absorbRate = 10.0; // light absorption rate by density
 
 void main()
 {
-    vec2 coord = vec2(gl_FragCoord.x/float(width), gl_FragCoord.y/float(height));
-    vec3 enter = texture(raystart, coord).xyz;
-    vec3 leave = texture(raystop, coord).xyz;
+	//glFragColor = vec4(1, 0, 0, 1);
+	//return;
 
-    if (enter == leave) { discard; return;}
+	
+	
+	
+	if (gl_FrontFacing) {
+		discard;
+		return;
+	}
 
-    vec3 ray = leave - enter;
-	float raylen = length(ray);
+
+
+	vec3 enter = (cameraPos + vec3(1,1,1)) * 0.5;
+    vec3 leave = (vPosition + vec3(1,1,1)) * 0.5;
+	vec3 ray = leave - enter;
+	float raylen = 4.0;
+
 	vec3 step = normalize(ray) * stepSize; //step along the ray
 
 	float alpha = 0.0; //init alpha from eye
@@ -38,7 +45,25 @@ void main()
 	glFragColor = vec4(0);
 	vec3 pos = enter;
 
+	bool outside = true;
+	if (enter.x >= 0 && enter.x <= 1 && enter.y >= 0 && enter.y <= 1 && enter.z >= 0 && enter.z <= 1) {
+		outside = false;
+	}
 	while (alpha < 0.99 && raylen > 0) {
+		if (outside) {
+			if (pos.x < 0 || pos.x > 1 || pos.y < 0 || pos.y > 1 || pos.z < 0 || pos.z > 1) {
+				pos += step;
+				raylen -= stepSize;
+				continue;
+			} else {
+				outside = false;
+			}
+		}
+
+		if (pos.x < 0 || pos.x > 1 || pos.y < 0 || pos.y > 1 || pos.z < 0 || pos.z > 1) {
+			break;
+		}
+
 		float sampleDens = texture(density, pos).x * densityScale; //density is too small, but temprature starts very high
 		if(sampleDens>0){
 			//get lights color on the pixel

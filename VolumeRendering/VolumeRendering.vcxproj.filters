@@ -39,6 +39,9 @@
     <Filter Include="Source Files\shader\fs">
       <UniqueIdentifier>{a5818e7c-c77f-4a8b-bc59-c797db0a5dbc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\shader\vs">
+      <UniqueIdentifier>{83f87445-5bf4-43b0-b7c3-565c736b7bd4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -63,9 +66,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -103,6 +103,18 @@
     </None>
     <None Include="shader\fs\raycastfs.glsl">
       <Filter>Source Files\shader\fs</Filter>
+    </None>
+    <None Include="shader\fs\raycast2fs.glsl">
+      <Filter>Source Files\shader\fs</Filter>
+    </None>
+    <None Include="shader\vs\rayboxintersectvs.glsl">
+      <Filter>Source Files\shader\vs</Filter>
+    </None>
+    <None Include="shader\vs\raycast2vs.glsl">
+      <Filter>Source Files\shader\vs</Filter>
+    </None>
+    <None Include="shader\vs\raycastvs.glsl">
+      <Filter>Source Files\shader\vs</Filter>
     </None>
   </ItemGroup>
 </Project>
