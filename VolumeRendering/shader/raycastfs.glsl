@@ -9,34 +9,23 @@ uniform vec3 cameraPos;
 uniform vec3 lightPos = vec3(1.0, 1.0, 2.0);
 uniform vec3 lightColor = vec3(10.0);
 
-const float maxLen = sqrt(2.0); //max length of a cube
-const int sampleNum = 256;
 const int lightsampleNum = 128;
-const float stepSize = maxLen/float(sampleNum);
-const float lightStepSize = maxLen / float(lightsampleNum);
+const float stepSize = 0.005;
+const float lightStepSize = 0.01;
 const float densityScale = 10; //density number is too small to sample
 const float lightScale = 0.5; //scale of light color
 const float absorbRate = 10.0; // light absorption rate by density
 
-void main()
-{
-	//glFragColor = vec4(1, 0, 0, 1);
-	//return;
-
-	
-	
-	
+void main() {
 	if (gl_FrontFacing) {
 		discard;
 		return;
 	}
 
-
-
 	vec3 enter = (cameraPos + vec3(1,1,1)) * 0.5;
     vec3 leave = (vPosition + vec3(1,1,1)) * 0.5;
 	vec3 ray = leave - enter;
-	float raylen = 4.0;
+	float raylen = length(ray);
 
 	vec3 step = normalize(ray) * stepSize; //step along the ray
 
