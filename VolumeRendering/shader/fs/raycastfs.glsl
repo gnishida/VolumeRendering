@@ -33,17 +33,18 @@ void main()
 	float raylen = length(ray);
 	vec3 step = normalize(ray) * stepSize; //step along the ray
 
-	float alpha = 1.0; //init alpha from eye
+	float alpha = 0.0; //init alpha from eye
 	vec3 color = vec3(0);
 	glFragColor = vec4(0);
 	vec3 pos = enter;
 
-	while(alpha>0.01 && raylen>0){
+	while (alpha < 0.99 && raylen > 0) {
 		float sampleDens = texture(density, pos).x * densityScale; //density is too small, but temprature starts very high
 		if(sampleDens>0){
 			//get lights color on the pixel
 			vec3 lightDir = normalize(lightPos-pos)*lightStepSize;
 			vec3 lpos = pos + lightDir;
+
 			//get alpha of how many light can reach the pixel
 			float lapha = 1.0;
 			for (int s=0; s < lightsampleNum; ++s) {
@@ -54,8 +55,8 @@ void main()
 			}
 			vec3 finallightColor = lightColor*lapha;
 
-			alpha *= 1.0-sampleDens*stepSize*absorbRate; //alpha of current color can reach the eye
-			color += finallightColor*alpha*sampleDens*stepSize; //sample color contribution
+			alpha += (1.0 - alpha) * sampleDens*stepSize*absorbRate; //alpha of current color can reach the eye
+			color += (1.0 - alpha) * sampleDens*stepSize*finallightColor; //sample color contribution
 		}
 
 		pos += step;
@@ -63,5 +64,5 @@ void main()
 	}
 
 	glFragColor.rgb = color;
-	glFragColor.a = 1-alpha;
+	glFragColor.a = alpha;
 }
