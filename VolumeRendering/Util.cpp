@@ -1,4 +1,4 @@
-#include "Utility.h"
+#include "Util.h"
 #include <fstream>
 #include <iostream>
 
@@ -159,4 +159,30 @@ GLuint Util::CreateQuadVao() {
     glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, stride, 0);
 
     return vao;
+}
+
+void Util::loadVTK(char* filename, int& width, int& height, int& depth, float** data) {
+	FILE* fp = fopen(filename, "r");
+
+	while (true) {
+		char buff[1024];
+		fgets(buff, 1024, fp);
+
+		if (strncmp(buff, "#", 1) == 0) {
+			// skip
+		} else if (strncmp(buff, "LOOKUP_TABLE", 12) == 0) {
+			break;
+		} else if (strncmp(buff, "DIMENSIONS", 10) == 0) {
+			sscanf(buff, "DIMENSIONS %d %d %d", &width, &height, &depth);
+		}
+	}
+
+	*data = new float[width * height * depth];
+	for (int i = 0; i < width * height * depth; ++i) {
+		unsigned short val;
+		fread(&val, 1, 1, fp);
+		(*data)[i] = (float)val / 256.0f;
+	}
+
+	fclose(fp);
 }

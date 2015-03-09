@@ -1,6 +1,6 @@
 ﻿#include "VolumeRendering.h"
 #include <iostream>
-#include "Utility.h"
+#include "Util.h"
 
 VolumeRendering::VolumeRendering(int winWidth, int winHeight) {
 	this->winWidth = winWidth;

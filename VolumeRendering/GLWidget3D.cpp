@@ -3,6 +3,7 @@
 #include "MainWindow.h"
 #include <GL/GLU.h>
 #include <QRgb>
+#include "Util.h"
 
 #define SQR(x)	((x) * (x))
 
@@ -58,6 +59,12 @@ void GLWidget3D::initializeGL() {
 		qDebug() << "Error: " << glewGetErrorString(err);
 	}
 
+#if 1
+	float* data;
+	int width, height, depth;
+	Util::loadVTK("delta-vorticitymag.vtk", width, height, depth, &data);
+#endif
+
 #if 0
 	// 盆栽の3Dデータを読み込む
 	FILE* fp = fopen("bonsai.raw", "r");
@@ -98,7 +105,7 @@ void GLWidget3D::initializeGL() {
 	}
 #endif
 
-#if 1
+#if 0
 	// 球の形の3Dデータを作成する
 	int width = 128;
 	int height = 128;
