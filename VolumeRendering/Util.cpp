@@ -191,17 +191,10 @@ void Util::loadVTK(char* filename, int& width, int& height, int& depth, float** 
 		if (val < min_val) {
 			min_val = val;
 		}
-		(*data)[i] = (float)val / 1000.0f;
+		(*data)[i] = (float)val / 65536.0f;
 	}
 
 	printf("max val: %d, min_val: %d\n", max_val, min_val);
-
-	// normalize
-	/*
-	for (int i = 0; i < width * height * depth; ++i) {
-		(*data)[i] = (float)((*data)[i] - min_val) / (float)(max_val - min_val);
-	}
-	*/
 
 	fclose(fp);
 }
