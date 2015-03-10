@@ -22,7 +22,6 @@ VolumeRendering::~VolumeRendering() {
 
 	if (cubeVao > 0) {
 		glDeleteVertexArrays(1, &cubeVao);
-		glDeleteVertexArrays(1, &quadVao);
 	}
 }
 

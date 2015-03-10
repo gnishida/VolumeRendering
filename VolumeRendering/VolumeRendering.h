@@ -7,8 +7,11 @@
 
 class VolumeRendering {
 private:
+	int gridWidth;
+	int gridHeight;
+	int gridDepth;
+
 	GLuint cubeVao;
-    GLuint quadVao;
 
 	GLuint program;
 
