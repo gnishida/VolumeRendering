@@ -2,10 +2,7 @@
 #include <iostream>
 #include "Util.h"
 
-VolumeRendering::VolumeRendering(int winWidth, int winHeight) {
-	this->winWidth = winWidth;
-	this->winHeight = winHeight;
-
+VolumeRendering::VolumeRendering() {
     program = Util::LoadProgram("raycastvs", "raycastfs");
 
     cubeVao = Util::CreateCubeVao();
@@ -72,36 +69,6 @@ void VolumeRendering::setVolumeData(GLsizei width, GLsizei height, GLsizei depth
 
 	// 出力先をスクリーンに戻す
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void VolumeRendering::setWindowSize(int width, int height) {
-	winWidth = width;
-	winHeight = height;
-}
-
-void VolumeRendering::update(const QVector3D& cameraPos) {
-    // 画面サイズなどから、projectionMatrixを計算する
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    float aspect = (float)winWidth/(float)winHeight;
-    gluPerspective(60, aspect, 0.1, 1000);
-    glGetFloatv (GL_PROJECTION_MATRIX, projectionMatrix);
-    glPopMatrix();
-
-	// 回転などから、modelviewMatrixを計算する
-	// GLWidget側で計算するので、ここでは不要になったよ！
-	/*
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glTranslatef(0, 0, -trans_z[0]);//update position, based on current z translation
-    glMultMatrixf( view_rotate );
-    glGetFloatv (GL_MODELVIEW_MATRIX, _modelviewMatrix);//get transformation matrix
-    glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	*/
-
-	// RayCastを実施して、スクリーンに描画する
-	render(cameraPos);
 }
 
 /**

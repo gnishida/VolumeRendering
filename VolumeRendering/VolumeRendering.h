@@ -7,9 +7,6 @@
 
 class VolumeRendering {
 private:
-	int winWidth;
-	int winHeight;
-
 	GLuint cubeVao;
     GLuint quadVao;
 
@@ -23,14 +20,10 @@ public:
     GLfloat modelviewMatrix[16];
 
 public:
-	VolumeRendering(int winWidth, int winHeight);
+	VolumeRendering();
 	~VolumeRendering();
 
 	void setVolumeData(GLsizei width, GLsizei height, GLsizei depth, float* data);
-	void setWindowSize(int width, int height);
-	void update(const QVector3D& cameraPos);
-
-private:
 	void render(const QVector3D& cameraPos);
 };
 

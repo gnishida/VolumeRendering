@@ -56,7 +56,7 @@ void GLWidget3D::initializeGL() {
 	}
 
 	// Volume Renderingを初期化
-	vr = new VolumeRendering(this->width(), this->height());
+	vr = new VolumeRendering();
 
 }
 
@@ -66,16 +66,12 @@ void GLWidget3D::initializeGL() {
 void GLWidget3D::resizeGL(int width, int height) {
 	height = height?height:1;
 
-    glViewport(0, 0, width, height);
-    
-	// Use orthographic projection
-    glMatrixMode(GL_PROJECTION);    
-    glLoadIdentity();               
-    gluOrtho2D(-1, 1, -1, 1);       
-    glMatrixMode(GL_MODELVIEW);     
-    glLoadIdentity(); 
-
-	vr->setWindowSize(width, height);
+    // 画面サイズなどから、projectionMatrixを計算する
+    glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+    float aspect = (float)width/(float)height;
+    gluPerspective(60, aspect, 0.1, 1000);
+    glGetFloatv (GL_PROJECTION_MATRIX, vr->projectionMatrix);
 }
 
 /**
@@ -89,7 +85,7 @@ void GLWidget3D::paintGL() {
 	glGetFloatv(GL_MODELVIEW_MATRIX, vr->modelviewMatrix);
 
 
-	vr->update(QVector3D(camera.getCamPos()));
+	vr->render(QVector3D(camera.getCamPos()));
 }
 
 QVector2D GLWidget3D::mouseTo2D(int x,int y) {
