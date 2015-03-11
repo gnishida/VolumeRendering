@@ -10,7 +10,7 @@ VolumeRendering::VolumeRendering() {
 
 	fbo = 0;
 	texture = 0;
-	cubeVao = 0;
+	boxVao = 0;
 }
 
 VolumeRendering::~VolumeRendering() {
@@ -19,8 +19,8 @@ VolumeRendering::~VolumeRendering() {
 		glDeleteTextures(1, &texture);
 	}
 
-	if (cubeVao > 0) {
-		glDeleteVertexArrays(1, &cubeVao);
+	if (boxVao > 0) {
+		glDeleteVertexArrays(1, &boxVao);
 	}
 }
 
@@ -43,9 +43,12 @@ void VolumeRendering::setVolumeData(GLsizei width, GLsizei height, GLsizei depth
 		glDeleteFramebuffers(1, &fbo);
 		glDeleteTextures(1, &texture);
 	}
+	if (boxVao > 0) {
+		glDeleteVertexArrays(1, &boxVao);
+	}
 
 	// 3Dデータを囲むボックスを生成
-    cubeVao = Util::CreateBoxVao(width, height, depth);
+	boxVao = Util::CreateBoxVao(width, height, depth);
 
 	//the FBO
 	glGenFramebuffers(1, &this->fbo);
@@ -83,7 +86,7 @@ void VolumeRendering::setVolumeData(GLsizei width, GLsizei height, GLsizei depth
  * @param dest		キューブの前面／背面の交点の座標を計算するためのfboと２つの2Dテクスチャ
  */
 void VolumeRendering::render(const QVector3D& cameraPos) {
-	if (cubeVao == 0) return;
+	if (boxVao == 0) return;
 
 	// キューブの前面／背面の交点を計算するGPUシェーダを選択
 	glUseProgram(program);
@@ -131,7 +134,7 @@ void VolumeRendering::render(const QVector3D& cameraPos) {
 	// つまり、該当テクセルのRGBとして、実際にはXYZが格納される。
 	// また、カメラから遠い側の交点のワールド座標系での座標が、glFragColor[1]の対応するテクセルに、
 	// 同様に、色情報として格納される。
-    glBindVertexArray(cubeVao);
+    glBindVertexArray(boxVao);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0); // 頂点をindexで指定するので、glDrawElementsを使う
 	                                                        // また、index数は36個あるので、引数は36。
 

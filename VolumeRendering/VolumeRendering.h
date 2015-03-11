@@ -11,12 +11,11 @@ private:
 	int gridHeight;
 	int gridDepth;
 
-	GLuint cubeVao;
-
 	GLuint program;
 
 	GLuint fbo;
 	GLuint texture;
+	GLuint boxVao;
 
 public:
     GLfloat projectionMatrix[16]; 
