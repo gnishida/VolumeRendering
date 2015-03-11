@@ -80,6 +80,58 @@ GLuint Util::LoadProgram(const char* vsfile, const char* fsfile) {
 
 }
 
+GLuint Util::CreateBoxVao(int width, int height, int depth) {
+    float positions[] = {
+		-width * 0.5, -height * 0.5, -depth * 0.5, 
+		-width * 0.5, -height * 0.5,  depth * 0.5, 
+		-width * 0.5,  height * 0.5, -depth * 0.5, 
+		-width * 0.5,  height * 0.5,  depth * 0.5, 
+		 width * 0.5, -height * 0.5, -depth * 0.5, 
+		 width * 0.5, -height * 0.5,  depth * 0.5, 
+		 width * 0.5,  height * 0.5, -depth * 0.5, 
+		 width * 0.5,  height * 0.5,  depth * 0.5, 
+	};
+    
+    short indices[] = {
+        7, 3, 1, 1, 5, 7, 
+        0, 2, 6, 6, 4, 0, 
+        6, 2, 3, 3, 7, 6, 
+        1, 0, 4, 4, 5, 1, 
+        3, 2, 0, 0, 1, 3, 
+        4, 6, 7, 7, 5, 4, 
+    };
+
+    // Create the VAO:
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    // Create the VBO for positions:
+    {
+        GLuint vbo;
+        GLsizeiptr size = sizeof(positions);
+        glGenBuffers(1, &vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, size, positions, GL_STATIC_DRAW);
+    }
+
+    // Create the VBO for indices:
+    {
+        GLuint vbo;
+        GLsizeiptr size = sizeof(indices);
+        glGenBuffers(1, &vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
+    }
+
+    // Set up the vertex layout:
+    GLsizeiptr stride = 3 * sizeof(positions[0]);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
+
+    return vao;
+}
+
 //create cubic information
 GLuint Util::CreateCubeVao() {
     float positions[] = { 

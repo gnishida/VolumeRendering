@@ -4,6 +4,7 @@ in vec3 vPosition;
 out vec4 glFragColor;
 
 uniform sampler3D density;
+uniform vec3 gridSize;
 uniform vec3 cameraPos;
 
 uniform vec3 lightPos = vec3(1.0, 1.0, 2.0);
@@ -20,19 +21,28 @@ void main() {
 		return;
 	}
 
-	vec3 eye = (cameraPos + vec3(1,1,1)) * 0.5;
-    vec3 obj = (vPosition + vec3(1,1,1)) * 0.5;
+	// conmpute the eye position in the texture coodinates
+	vec3 eye = (cameraPos + gridSize * 0.5) / gridSize;
+
+	// compute the object position in the texture coordinates
+	vec3 obj = (vPosition + gridSize * 0.5) / gridSize;
+
+	// compute the ray direction
 	vec3 ray = obj - eye;
 
 	int numSteps = int(length(ray) / stepSize);
 
-	vec3 step = normalize(ray) * stepSize; //step along the ray
+	// ray step vector for each step
+	vec3 step = normalize(ray) * stepSize;
 
 	float alpha = 0.0; //init alpha from eye
 	vec3 color = vec3(0);
 	glFragColor = vec4(0);
 	vec3 pos = eye;
 
+	// outside flag
+	// if this is false, the current position is outside the bounding box.
+	// otherwise, it's inside the bounding box.
 	bool outside = true;
 	if (pos.x >= 0 && pos.x <= 1 && pos.y >= 0 && pos.y <= 1 && pos.z >= 0 && pos.z <= 1) {
 		outside = false;

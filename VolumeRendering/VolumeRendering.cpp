@@ -5,13 +5,12 @@
 VolumeRendering::VolumeRendering() {
     program = Util::LoadProgram("raycastvs", "raycastfs");
 
-    cubeVao = Util::CreateCubeVao();
-
 	glDisable(GL_DEPTH_TEST);
     glEnableVertexAttribArray(0);
 
 	fbo = 0;
 	texture = 0;
+	cubeVao = 0;
 }
 
 VolumeRendering::~VolumeRendering() {
@@ -36,10 +35,17 @@ VolumeRendering::~VolumeRendering() {
  * @return					FBOと対応する3Dテクスチャを返却する。
  */
 void VolumeRendering::setVolumeData(GLsizei width, GLsizei height, GLsizei depth, float* data) {
+	gridWidth = width;
+	gridHeight = height;
+	gridDepth = depth;
+
 	if (fbo > 0) {
 		glDeleteFramebuffers(1, &fbo);
 		glDeleteTextures(1, &texture);
 	}
+
+	// 3Dデータを囲むボックスを生成
+    cubeVao = Util::CreateBoxVao(width, height, depth);
 
 	//the FBO
 	glGenFramebuffers(1, &this->fbo);
@@ -77,6 +83,8 @@ void VolumeRendering::setVolumeData(GLsizei width, GLsizei height, GLsizei depth
  * @param dest		キューブの前面／背面の交点の座標を計算するためのfboと２つの2Dテクスチャ
  */
 void VolumeRendering::render(const QVector3D& cameraPos) {
+	if (cubeVao == 0) return;
+
 	// キューブの前面／背面の交点を計算するGPUシェーダを選択
 	glUseProgram(program);
     
@@ -88,6 +96,7 @@ void VolumeRendering::render(const QVector3D& cameraPos) {
 	// シェーダに渡している。
 	glUniformMatrix4fv(glGetUniformLocation(program, "modelviewMatrix"), 1, 0, (float*)&modelviewMatrix);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, 0, (float*)&projectionMatrix);
+	glUniform3f(glGetUniformLocation(program, "gridSize"), gridWidth, gridHeight, gridDepth);
 	glUniform3f(glGetUniformLocation(program, "cameraPos"), cameraPos.x(), cameraPos.y(), cameraPos.z());
     glUniform1i(glGetUniformLocation(program, "density"), 0);
 

@@ -28,7 +28,7 @@ public:
 		zrot = 0.0f;//-45.0;
 		dx = 0.0;
 		dy = 0.0;
-		dz = 2.0;
+		dz = 400.0;
 		lookAtX = 0.0f;
 		lookAtY = 0.0f;
 		lookAtZ = 0.0f;

@@ -11,6 +11,7 @@ public:
 	static int LoadShader(char* filename, std::string& text);
 	static GLuint LoadProgram(const char* vsKey, const char* fsKey);
 
+	static GLuint CreateBoxVao(int width, int height, int depth);
 	static GLuint CreateCubeVao();
 	static GLuint CreateQuadVao();
 

@@ -65,12 +65,13 @@ void GLWidget3D::initializeGL() {
  */
 void GLWidget3D::resizeGL(int width, int height) {
 	height = height?height:1;
+	glViewport(0, 0, (GLint)this->width(), (GLint)this->height());
 
     // 画面サイズなどから、projectionMatrixを計算する
     glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
     float aspect = (float)width/(float)height;
-    gluPerspective(60, aspect, 0.1, 1000);
+    gluPerspective(45, aspect, 0.1, 10000);
     glGetFloatv (GL_PROJECTION_MATRIX, vr->projectionMatrix);
 }
 
