@@ -1,0 +1,19 @@
+<html>
+<html>
+<div style="margin: auto; width: 800px;">
+<h1>Volume Rendering</h1>
+<p>In this project, I have implemented a simple direct volume rendering (Figure 1).</p>
+<div style="text-align: center"><img width="500" src="bonsai.png"/><br/><strong>Figure 1. Bonsai</strong></div>
+<p>The pipeline is as follows:
+<oi>
+<li>send the 3d data to 3d texture memory on GPU by <i>glTexImage3D()</i>,</li>
+<li>create a bounding box,</li>
+<li>bind the 3d texture by <i>glBindTexture</i> so that the gpu shaders can access to it,</li>
+<li>and, render the bounding box.</li>
+</oi>
+</p>
+<p>Also, in the fragment shader, perform a ray casting from the eye position to the end of the object. Since a fragment shader can be called at most twice for each pixel, I use <i>gl_FrontFacing</i> to check whether the point is facing the camera or not. If it is facing the camera, the point is discarded. The inside/outside check can be efficiently done by checking the texture coordinates are within [0, 1] in all the axis. This approach works even if the eye position is within the object (Figure 2).</p>
+<div style="text-align: center"><img width="500" src="bonsai2.png"/><br/><strong>Figure 2. Bonsai zoomed in</strong></div>
+</div>
+</html>
+</html>
