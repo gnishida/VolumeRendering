@@ -13,7 +13,6 @@ private:
 
 	GLuint program;
 
-	GLuint fbo;
 	GLuint texture;
 	GLuint boxVao;
 

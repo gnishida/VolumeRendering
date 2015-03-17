@@ -8,14 +8,12 @@ VolumeRendering::VolumeRendering() {
 	glDisable(GL_DEPTH_TEST);
     glEnableVertexAttribArray(0);
 
-	fbo = 0;
 	texture = 0;
 	boxVao = 0;
 }
 
 VolumeRendering::~VolumeRendering() {
-	if (fbo > 0) {
-		glDeleteFramebuffers(1, &fbo);
+	if (texture > 0) {
 		glDeleteTextures(1, &texture);
 	}
 
@@ -25,22 +23,19 @@ VolumeRendering::~VolumeRendering() {
 }
 
 /**
- * FBOと、対応する、指定した幅、高さ、奥行きの3Dテクスチャを生成し、
- * 雲みたいなやつをセットする。
+ * 指定した幅、高さ、奥行きの3Dテクスチャを生成し、指定した3Dデータをテクスチャにセットする。
  *
- * @param width				幅
- * @param height			高さ
- * @param depth				奥行き
- * @param numComponents		コンポーネントの数 (各テクセルがscalarなら1、RGBベクトルなら3）
- * @return					FBOと対応する3Dテクスチャを返却する。
+ * @param width		幅
+ * @param height	高さ
+ * @param depth		奥行き
+ * @param data		3Dデータ
  */
 void VolumeRendering::setVolumeData(GLsizei width, GLsizei height, GLsizei depth, float* data) {
 	gridWidth = width;
 	gridHeight = height;
 	gridDepth = depth;
 
-	if (fbo > 0) {
-		glDeleteFramebuffers(1, &fbo);
+	if (texture > 0) {
 		glDeleteTextures(1, &texture);
 	}
 	if (boxVao > 0) {
@@ -49,10 +44,6 @@ void VolumeRendering::setVolumeData(GLsizei width, GLsizei height, GLsizei depth
 
 	// 3Dデータを囲むボックスを生成
 	boxVao = Util::CreateBoxVao(width, height, depth);
-
-	//the FBO
-	glGenFramebuffers(1, &this->fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
 
 	// 3Dテクスチャを生成
 	glGenTextures(1, &this->texture);
@@ -67,23 +58,16 @@ void VolumeRendering::setVolumeData(GLsizei width, GLsizei height, GLsizei depth
 
 	// 3Dテクスチャ用のメモリを確保する
     glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, width, height, depth, 0, GL_RED, GL_FLOAT, data);
-    if(GL_NO_ERROR != glGetError()){std::cout<<"Unable to create 3D texture"<<std::endl;}
-
-	// 生成した3Dテクスチャを、fboに括り付ける。
-	// 以後、OpenGLに対しては、fboを指定することで、この3Dテクスチャにアクセスできるようになる。
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->texture, 0);
-
-    if(GL_NO_ERROR != glGetError()){std::cout<<"Unable to bind texture to fbo"<<std::endl;}
-
-	// 出力先をスクリーンに戻す
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    if (GL_NO_ERROR != glGetError()) {
+		std::cout << "Unable to create 3D texture"<< std::endl;
+	}
 }
 
 /**
  * 画面のピクセルに対応する、キューブの前面／背面の交点を計算し、
  * destに括りついた２つの2Dテクスチャにそれぞれ格納する。
  *
- * @param dest		キューブの前面／背面の交点の座標を計算するためのfboと２つの2Dテクスチャ
+ * @param cameraPos		カメラの位置
  */
 void VolumeRendering::render(const QVector3D& cameraPos) {
 	if (boxVao == 0) return;
